@@ -246,7 +246,7 @@ class Game
 			@scene.sound.setMute @state; @setText ["🔈", "🔊"][@state = 1 - @state]).bind @muter
 		@muter.emit('pointerdown')
 		# Ambient music.
-		random = () -> console.log @; @[Phaser.Math.Between 0, @length-1].play()
+		random = () -> @[Phaser.Math.Between 0, @length-1].play()
 		@track_list	= []
 		@track_list = @track_list.concat (for vol, idx in [0.15, 0.4]
 			@scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 3000}).on 'complete', random.bind @track_list)
