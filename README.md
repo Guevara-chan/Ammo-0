@@ -1,1 +1,3 @@
-# Ammo-0
+# ⋮Sum⋮
+__Ammo:0__ is an experimental 2D anti shooter, made to explore and refine basic concepts of subgenre.  
+Initially developed in ~3 days using [Phaser3](https://phaser.io/phaser3).
