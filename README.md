@@ -1,3 +1,3 @@
 # ⋮Sum⋮
-__Ammo:0__ is an experimental 2D anti shooter, made to explore and refine basic concepts of subgenre.  
-Initially developed in ~3 days using [Phaser3](https://phaser.io/phaser3).
+__Ammo:0__ is an experimental top-down 2D anti shooter, made to explore and refine basic concepts of subgenre.  
+Initially developed in ~3 days using [Phaser3](https://phaser.io/phaser3), project is focuses on code expressiveness and rapid development.
