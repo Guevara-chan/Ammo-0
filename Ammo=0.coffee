@@ -246,11 +246,11 @@ class Game
 			@scene.sound.setMute @state; @setText ["🔈", "🔊"][@state = 1 - @state]).bind @muter
 		@muter.emit('pointerdown')
 		# Ambient music.
-		random = () -> @[Phaser.Math.Between 0, @length-1].play()
 		@track_list	= []
-		@track_list = @track_list.concat (for vol, idx in [0.15, 0.4]
-			@scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 3000}).on 'complete', random.bind @track_list)
-		random.bind(@track_list)()
+		random = (() -> @[Phaser.Math.Between 0, @length-1].play()).bind @track_list
+		for vol, idx in [0.15, 0.4]
+			@track_list.push @scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 3000}).on 'complete', random
+		random()
 		# Additional preparations.
 		@scene.input.setPollAlways true
 		document.getElementById('ui').style.visibility = 'visible'
