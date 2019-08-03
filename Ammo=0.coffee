@@ -82,6 +82,7 @@ class Player extends Body
 	notedeath: () ->
 		return unless @alive
 		@trashed++
+		@scene.spawnlag += Math.max 0, 300 - @scene.player.trashed * 15
 		@trash_anim = @scene.tweens.add cfg =
 			targets: @hud.list[1], scaleY: 0.0, yoyo: true, duration: 300, ease: 'Power1'
 
@@ -104,10 +105,9 @@ class Player extends Body
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
 		if @scene.enemies is 0 then @hud.last.setText("No threat ?").setColor('slategray')
 		else 
-			{r,g,b} = 
-				Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5, @scene.enemies)
+			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
 			@hud.last.setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
-				Math.round(r).toString(16) + Math.round(g).toString(16) + Math.round(b).toString(16)
+				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
 		# Finalization.
 		@target.visible = true
 		@alive
@@ -282,8 +282,8 @@ class Game
 		@scene.tweens.add cfg =
 			targets: @briefing, alpha: 0, duration: 1300, y: start_y + 40, ease: 'Sine.easeInOut'
 		# Finalization.
-		@spawnlag		= 0
 		@welcome?.destroy()
+		@scene.spawnlag	= 0
 		@space.rotation = 0
 		@scene.cameras.main.fadeIn(1000)
 
@@ -292,7 +292,7 @@ class Game
 		x = @scene.player.model.x + @rnd(@app.config.width / 2, width - @app.config.width)	 unless x?
 		y = @scene.player.model.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
 		@scene.objects.push @enemy = new MissileBase @scene, x, y
-		@spawnlag += 50 #Math.max 0, 800 - @scene.player.trashed * 50
+		@scene.spawnlag += Math.max 0, 500 - @scene.player.trashed * 25
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
@@ -300,7 +300,7 @@ class Game
 		else return @space.rotation -= 0.001 unless @scene.player?
 		if @scene.player.alive
 			@scene.pending = []
-			if @scene.enemies < 5 and (@spawnlag = Math.max 0, @spawnlag-1) is 0 then @spawn()
+			if @scene.enemies < 5 and (@scene.spawnlag = Math.max 0, @scene.spawnlag-1) is 0 then @spawn()
 			@scene.objects = @scene.objects.filter (obj) -> obj.alive and obj.update()
 			@scene.objects = @scene.objects.concat @scene.pending
 		else @init(0)
