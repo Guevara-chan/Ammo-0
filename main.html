@@ -3,19 +3,27 @@
 	<head>
 		<title>◢.Ammo:0.◣</title>
 		<link rel="icon" href="res/Ammo=0.ico">
-		<script src="lib/FontLoader.js"></script>
 		<script src="lib/phaser.min.js"></script>
 		<script src="lib/coffeescript.js"></script>
 		<script type="text/coffeescript" src="Ammo=0.coffee"></script>
 		<style>
-			@font-face {font-family: 'Saira Stencil One'; src: url(res/SairaStencilOne-Regular.ttf)}
-			.centerer {position: absolute; top: 50%; left: 50%; transform: translateX(-50%) translateY(-50%); margin: 0;}
+			@font-face {font-family: 'Saira Stencil One';	src: url(res/SairaStencilOne-Regular.ttf)}
+			@font-face {font-family: 'Titillium Web';		src: url(res/titillium-web-regular.ttf)}
+			.centerer {display: flex; position: absolute; top: 0; bottom: 0; right: 0; left: 0;}
+			.block {margin: auto; width: max-content;}
 		</style>
 	</head>
 	<body style ='margin:0; background: #0f0f0f -webkit-repeating-linear-gradient(top, transparent 0px, transparent 1px, rgba(0, 0, 0, 0.25)	1px, rgba(0, 0, 0, 0.25) 2px); -webkit-background-size: 100% 2px; overflow: hidden; user-select: none; -moz-user-select: none; -ms-user-select: none;'>
-		<center class="centerer" style="color: coral; font-size: 65px; text-shadow: 0px 0px 7px lightsalmon">..:Now loading:..</center>
-		<center id="ui" class="centerer" style="visibility: hidden; font-family: 'Saira Stencil One'">
-			<div id='vp' style="border: solid 1px slategray; margin: 0"/>
-		</center>
+		<div name="chrome_fix" class="centerer">
+			<center class="block" style="color: coral; font-size: 65px; text-shadow: 0px 0px 7px lightsalmon;">
+				..:Now loading:..
+			</center>
+		</div>
+		<span style="font-family: 'Titillium Web'" />
+		<div name="chrome_fix" class="centerer" style="font-family: 'Saira Stencil One'; line-height: 5%;">			
+			<center id="ui" class="block" style="visibility: hidden">
+				<div id='vp' style="border: solid 1px slategray; margin: 0" />
+			</center>
+		</div>
 	</body>
 </html>

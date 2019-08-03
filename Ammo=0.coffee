@@ -62,12 +62,11 @@ class Player extends Body
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		# Crosshair
-		@target = @scene.add.container 0, 0
+		@target = @scene.add.container(0, 0).setDepth 3
 		@target.add [
 			@scene.add.image(0, 0, 'dest').setScale(0.08, 0.08).setAlpha(0.9)
 			@scene.add.line(cfg.width / 2, 0, 0, 0, cfg.width * 3, 0, 0x50C878, 0.1),
 			@scene.add.line(0, -cfg.height / 2, 0, 0, 0, cfg.height * 3, 0x50C878, 0.1)]
-		@target.setDepth (2)
 		@scene.tweens.add cfg =
 			targets: @target.first
 			scaleX: 0.17
@@ -83,7 +82,7 @@ class Player extends Body
 		@score = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
 			lbl = @scene.add.text 0, 0, '', {fontFamily: 'Saira Stencil One', fontSize: 25, color: color}
 			lbl.setShadow(0, 0, "black", 7, true, true))
-		@score.setScrollFactor 0
+		@score.setScrollFactor(0).setDepth(2)
 
 	explode: () ->
 		super()
@@ -202,7 +201,7 @@ class Game
 	constructor: () ->
 		@app = new Phaser.Game
 			type: Phaser.WEBGL, width: 700, height: 590, parent: 'vp'
-			#scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
+			#scale: {mode: Phaser.Scale.EXACT_FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
@@ -234,10 +233,10 @@ class Game
 		@scene.jet		= @scene.add.particles('jet')
 		@scene.explode	= @scene.add.particles('explode')
 		@scene.steam	= @scene.add.particles('steam')
-		@scene.steam.setDepth(2)
+		@scene.steam.setDepth(1)
 		# SFX switcher.
 		@muter = @scene.add.text @app.config.width - 60, 15, "", {fontSize: 35, color: 'Cyan'}
-		@muter.setScrollFactor(0).setInteractive().state = 0
+		@muter.setScrollFactor(0).setInteractive().setDepth(2).state = 0
 		@muter.on 'pointerdown', (() ->
 			@scene.sound.setMute @state; @setText ["🔈", "🔊"][@state = 1 - @state]).bind @muter
 		@muter.emit('pointerdown')
@@ -254,10 +253,12 @@ class Game
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
 				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
-			@scene.add.text(0, cfg.height/2-60, "[click anywhere]".repeat(15), {fontSize: 35, color: 'coral'})
-			@scene.add.text(0, -(cfg.height/2-60), "[click anywhere]".repeat(15), {fontSize: 35, color: 'coral'})]
+			@scene.add.text(0, cfg.height/2-60, "[click anywhere]".repeat(15), 
+				{fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'})
+			@scene.add.text(0, -(cfg.height/2-60), "[click anywhere]".repeat(15), 
+				{fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'})]
 		for lbl, idx in @welcome.list[1..]
-			lbl.setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)
+			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)
 			@scene.tweens.add
 				targets: lbl
 				x: [-300, 300][idx]
