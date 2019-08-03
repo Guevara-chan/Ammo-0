@@ -272,7 +272,7 @@ class Game
 	init: () ->
 		# Init setup.
 		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
-		obj.destroy() for snd in @scene.sound.sounds when snd not in @track_list
+		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
 		@scene.objects = []
 		@scene.enemies = 0
 		@scene.objects.push @scene.player = new Player @scene, @app.config
