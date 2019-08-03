@@ -28,9 +28,9 @@ class Body
 			(700 - Phaser.Math.Distance.Between(@scene.player.model.x, @scene.player.model.y, @model.x, @model.y)) / 700
 
 	explode: (magnitude = 50) ->
-		@explosion  = @scene.explode.createEmitter cfg =
+		@explosion  = @scene.explode.createEmitter
 			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }, scale: { start: 0.1, end: 0 }, blendMode: 'ADD'
-		@explosion.explode(magnitude * 2, @model.x, @model.y)
+		.explode(magnitude * 2, @model.x, @model.y)
 		@model.destroy()
 		@trail?.stopFollow().stop()
 		@requiem?.play @volume()
@@ -181,15 +181,18 @@ class Game
 	self = null
 
 	# --Methods goes here.
-	constructor: () ->
+	constructor: (width = 1024, height = 768) ->
 		@app = new Phaser.Game
-			type: Phaser.WEBGL, width: 700, height: 590, parent: 'vp'
-			#scale: {mode: Phaser.Scale.EXACT_FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
+			type: Phaser.WEBGL, width: width, height: height, parent: 'vp'
+			scale: {mode: Phaser.Scale.EXACT_FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
 				#arcade:
 					#debug: true
+		console.log @app
+		window.resizeTo Math.max(window.innerWidth, width+20), Math.max(window.innerHeight, height+45)
+		window.moveTo (screen.width-window.outerWidth) / 2, (screen.height-window.outerHeight) / 2
 		self = @
 
 	preload: () ->
@@ -235,7 +238,6 @@ class Game
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
 				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)]
 		for idx in [0..1]
-			console.log [1,-1][idx]*(cfg.height/2-60)
 			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), "[click anywhere]".repeat(15), font =
 				fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
 			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)				
