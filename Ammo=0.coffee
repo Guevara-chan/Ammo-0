@@ -251,10 +251,11 @@ class Game
 			author = @scene.add.text(cfg.width / 2 - 220, cfg.height / 2 - 30, "「by Victoria A. Guevara」", 
 				{fontFamily: 'Titillium Web', fontSize: 20, color: 'orangered'}).setInteractive()
 			.setStroke('#202020', 2)
-			.on('pointerover',	() => author.setShadow(0, 0, "#cb4154", 3, true, true))
-			.on('pointerout',	() => author.setShadow(0, 0, "", 0))
+			.on('pointerover',	() => author.setShadow(0, 0, "goldenrod", 3, true, true))
+			.on('pointerout',	() => author.setShadow(1, 1, "#330000", 1))
 			.on('pointerdown',	() -> window.open("https://vk.com/guevara_chan"))
 			]
+		@welcome.last.emit('pointerout')
 		@scene.tweens.add
 			targets: author, alpha: 0.4, yoyo: true, repeat: -1, duration: 1000, ease: 'Sine.easeInOut'
 		for idx in [0..1]
