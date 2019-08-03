@@ -69,7 +69,7 @@ class Player extends Body
 		@hud = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
 			lbl = @scene.add.text 0, 0, '', {fontFamily: 'Saira Stencil One', fontSize: 25, color: color})
 		.setScrollFactor(0).setDepth(2)
-		.add(@scene.add.text 0, cfg.height-65, '', {fontFamily: 'Saira Stencil One', fontSize: 25, color: '#cb4154'})
+		.add(@scene.add.text 0, cfg.height-65, '', {fontFamily: 'Saira Stencil One', fontSize: 25})
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 
 	explode: () ->
@@ -102,7 +102,8 @@ class Player extends Body
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.last.scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
-		@hud.last.setText("Threat: #{'⬛'.repeat(@scene.enemies)}")
+		@hud.last.setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor [
+			'green', 'yellow', 'orange', 'coral', '#cb4154', 'crimson'][Math.min 5, @scene.enemies]
 		# Finalization.
 		@target.visible = true
 		@alive
