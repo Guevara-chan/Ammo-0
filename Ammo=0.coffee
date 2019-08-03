@@ -6,7 +6,7 @@ class Body
 		# Init setup.
 		@model		= @scene.physics.add.existing @scene.add.container x, y, [@scene.add.image(0, 0, @sprite_id)]
 		@model.self	= @
-		@requiem	= @scene.sound.add "explode:#{@sprite_id}"
+		@requiem	= @scene.sound.add("explode:#{@sprite_id}").on 'complete', (snd) -> snd.destroy()
 		# Trail setup.
 		if trail_id?
 			@engine 
@@ -272,6 +272,7 @@ class Game
 	init: () ->
 		# Init setup.
 		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
+		obj.destroy() for snd in @scene.sound.sounds when snd not in @track_list
 		@scene.objects = []
 		@scene.enemies = 0
 		@scene.objects.push @scene.player = new Player @scene, @app.config
