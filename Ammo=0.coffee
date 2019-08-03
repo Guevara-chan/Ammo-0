@@ -104,9 +104,12 @@ class Player extends Body
 	update: () ->
 		super()
 		# Crosshair updating.
-		[@target.x, @target.y] = [ 
-			@scene.input.activePointer.position.x + @scene.cameras.main.scrollX,
-			@scene.input.activePointer.position.y + @scene.cameras.main.scrollY]
+		Object.assign @target, @scene.cameras.main.getWorldPoint @scene.input.activePointer.position.x,
+			@scene.input.activePointer.position.y
+		#[@target.x, @target.y] = [x, y]
+		# 	@scene.input.activePointer.position.x + @scene.cameras.main.scrollX,
+		# 	@scene.input.activePointer.position.y + @scene.cameras.main.scrollY]
+		console.log @target.position
 		@target.first.rotation -= 0.025
 		@orient @target
 		@model.body.setAcceleration(0)
@@ -201,7 +204,8 @@ class Game
 	# --Methods goes here.
 	constructor: () ->
 		@app = new Phaser.Game
-			type: Phaser.WEBGL; width: 800; height: 590, parent: 'vp'
+			type: Phaser.WEBGL, width: 800, height: 590, parent: 'vp'
+			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
