@@ -71,6 +71,7 @@ class Player extends Body
 		.setScrollFactor(0).setDepth(2)
 		.add(@scene.add.text 0, cfg.height-65, '', {fontFamily: 'Saira Stencil One', fontSize: 25})
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
+		@hud.add(@scene.add.rectangle(0, cfg.height-35, 0, 0, 0xfffff).setOrigin(0, 0.5))
 
 	explode: () ->
 		super()
@@ -103,11 +104,12 @@ class Player extends Body
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.last.scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
-		if @scene.enemies is 0 then @hud.last.setText("No threat ?").setColor('slategray')
+		if @scene.enemies is 0 then @hud.list[2].setText("No threat ?").setColor('slategray')
 		else 
 			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
-			@hud.last.setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
+			@hud.list[2].setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
+		@hud.last.setSize(@scene.spawnlag / 5, 3)
 		# Finalization.
 		@target.visible = true
 		@alive
