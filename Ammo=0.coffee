@@ -102,8 +102,12 @@ class Player extends Body
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.last.scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
-		@hud.last.setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor [
-			'green', 'yellow', 'orange', 'coral', '#cb4154', 'crimson'][Math.min 5, @scene.enemies]
+		if @scene.enemies is 0 then @hud.last.setText("No threat ?").setColor('slategray')
+		else 
+			{r,g,b} = 
+				Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5, @scene.enemies)
+			@hud.last.setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
+				Math.round(r).toString(16) + Math.round(g).toString(16) + Math.round(b).toString(16)
 		# Finalization.
 		@target.visible = true
 		@alive
@@ -288,7 +292,7 @@ class Game
 		x = @scene.player.model.x + @rnd(@app.config.width / 2, width - @app.config.width)	 unless x?
 		y = @scene.player.model.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
 		@scene.objects.push @enemy = new MissileBase @scene, x, y
-		@spawnlag += Math.max 0, 800 - @scene.player.trashed * 50
+		@spawnlag += 50 #Math.max 0, 800 - @scene.player.trashed * 50
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
