@@ -109,7 +109,8 @@ class Player extends Body
 			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
 			@hud.list[2].setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
-		@hud.last.setSize(@scene.spawnlag / 5, 3)
+		console.log  parseInt("0x"+@hud.list[2].style.color[1..])
+		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[2].style.color[1..])
 		# Finalization.
 		@target.visible = true
 		@alive
