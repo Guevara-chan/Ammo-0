@@ -1,6 +1,6 @@
 # ⋮Sum⋮
 __Ammo:0__ is an experimental top-down 2D anti shooter, designed to explore and refine basic concepts of subgenre.  
-_How will you fight when all your ammunition is depleted ?_ - this game totally revolves around this question.  
+_How will you fight when all your ammunition is depleted ?_ - this game totally revolves around that question.  
 Initially made in ~3 days using [Phaser3](https://phaser.io/phaser3), project is focused on code expressiveness and rapid development.
 
 # ⋮Featuræ⋮
