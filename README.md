@@ -6,3 +6,7 @@ Initially made in ~3 days using [Phaser3](https://phaser.io/phaser3), project is
 * Zero ammunition.
 * Lots of enemy rockets.
 * Infinite pacifistic carnage.
+
+# ⋮Compatibility⋮
+__Wire=world__ was best tested with _Chrome 76_ and [Electron](https://electronjs.org/), which is used to develop it.  
+Reported as being compeletely playable with _Mozilla Firefox_, _Edge_ and mobile devices.
