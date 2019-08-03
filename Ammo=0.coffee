@@ -201,7 +201,7 @@ class Game
 	# --Methods goes here.
 	constructor: () ->
 		@app = new Phaser.Game
-			type: Phaser.WEBGL, width: 800, height: 590, parent: 'vp'
+			type: Phaser.WEBGL, width: 700, height: 590, parent: 'vp'
 			#scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
