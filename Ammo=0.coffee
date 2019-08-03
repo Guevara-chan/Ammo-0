@@ -252,7 +252,7 @@ class Game
 		document.getElementById('ui').style.visibility = 'visible'
 		# Finalization.
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
-			@scene.add.text(0, 0, "Ammo:0", {fontSize: 125, color: '#cb4154'})
+			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
 				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
 			@scene.add.text(0, cfg.height/2-60, "[click anywhere]".repeat(15), {fontSize: 35, color: 'coral'})
 			@scene.add.text(0, -(cfg.height/2-60), "[click anywhere]".repeat(15), {fontSize: 35, color: 'coral'})]
