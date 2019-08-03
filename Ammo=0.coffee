@@ -4,8 +4,9 @@ class Body
 	# --Methods goes here.
 	constructor: (@sprite_id, @scene, x, y, trail_id) ->
 		# Init setup.
-		@model = @scene.physics.add.existing @scene.add.container x, y, [@scene.add.image(0, 0, @sprite_id)]
-		@model.self = @
+		@model		= @scene.physics.add.existing @scene.add.container x, y, [@scene.add.image(0, 0, @sprite_id)]
+		@model.self	= @
+		@requiem	= @scene.sound.add "explode:#{@sprite_id}"
 		# Trail setup.
 		if trail_id?
 			@engine 
@@ -39,7 +40,7 @@ class Body
 		@explosion.explode(magnitude * 2, @model.x, @model.y)
 		@model.destroy()
 		@trail?.stopFollow().stop()
-		@scene.requiems[@sprite_id]?.play @volume()
+		@requiem?.play @volume()
 		@alive = false
 
 	update: () ->
@@ -106,10 +107,6 @@ class Player extends Body
 		# Crosshair updating.
 		Object.assign @target, @scene.cameras.main.getWorldPoint @scene.input.activePointer.position.x,
 			@scene.input.activePointer.position.y
-		#[@target.x, @target.y] = [x, y]
-		# 	@scene.input.activePointer.position.x + @scene.cameras.main.scrollX,
-		# 	@scene.input.activePointer.position.y + @scene.cameras.main.scrollY]
-		console.log @target.position
 		@target.first.rotation -= 0.025
 		@orient @target
 		@model.body.setAcceleration(0)
@@ -160,6 +157,7 @@ class MissileBase extends Body
 		super 'mbase', scene, x, y
 		@model.setScale(0.0, 0.2).alpha = 0
 		@model.body.setOffset(-200, -200).setSize(400, 400)
+		@puff = @scene.sound.add "steam"
 		# Additional setup.
 		@scene.spacecrafts.add(@model)
 		@scene.enemies++
@@ -191,7 +189,7 @@ class MissileBase extends Body
 		if @reload++ is 100
 			@scene.pending.push new Missile @scene, @, @scene.player
 			@silo.explode(80, @model.x, @model.y)
-			@scene.steam_sfx.play @volume()
+			@puff.play @volume()
 			@reload = 0
 		@scene.physics.world.overlap @model, @scene.player.model, (bse, plr) ->
 			bse.self.explode()
@@ -205,7 +203,7 @@ class Game
 	constructor: () ->
 		@app = new Phaser.Game
 			type: Phaser.WEBGL, width: 800, height: 590, parent: 'vp'
-			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
+			#scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
@@ -238,11 +236,6 @@ class Game
 		@scene.explode	= @scene.add.particles('explode')
 		@scene.steam	= @scene.add.particles('steam')
 		@scene.steam.setDepth(2)
-		# SFX setup.
-		@scene.requiems = {}
-		for kind in ['rocket', 'mbase', 'pship']
-			@scene.requiems[kind] = @scene.sound.add "explode:#{kind}"
-		@scene.steam_sfx = @scene.sound.add "steam"
 		# SFX switcher.
 		@muter = @scene.add.text @app.config.width - 60, 15, "", {fontSize: 35, color: 'Cyan'}
 		@muter.setScrollFactor(0).setInteractive().state = 0
