@@ -13,6 +13,6 @@ __Ammo:0__ was best tested with _Chrome 76_ and [Electron](https://electronjs.or
 Reported as being compeletely playable with _Mozilla Firefox_, _Edge_ and mobile devices.
 
 # ⋮Brief spampling of weaponless warfare⋮
-![image](https://user-images.githubusercontent.com/8768470/62415990-8c9dfa80-b63b-11e9-8fd2-1214d4dac6e3.png)
+![image](https://user-images.githubusercontent.com/8768470/62416614-9da03900-b646-11e9-9465-db2f94daba12.png)
 ![image](https://user-images.githubusercontent.com/8768470/62416050-ad1a8480-b63c-11e9-96ce-e482ff5ba866.png)
 ![image](https://user-images.githubusercontent.com/8768470/62416061-fcf94b80-b63c-11e9-8550-608636b6ff19.png)
