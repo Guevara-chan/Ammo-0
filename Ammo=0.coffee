@@ -60,20 +60,21 @@ class Player extends Body
 			@scene.add.image(0, 0, 'dest').setScale(0.08, 0.08).setAlpha(0.9)
 			@scene.add.line(cfg.width / 2, 0, 0, 0, cfg.width * 3, 0, 0x50C878, 0.1),
 			@scene.add.line(0, -cfg.height / 2, 0, 0, 0, cfg.height * 3, 0x50C878, 0.1)]
-		@scene.tweens.add cfg =
+		@scene.tweens.add
 			targets: @target.first, scaleX: 0.17, scaleY: 0.17, ease: 'Power1'
 			duration: 300, repeat: -1, yoyo: true, repeatDelay: 500
 		# Finalization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@target.visible = false
-		@score = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
-			lbl = @scene.add.text 0, 0, '', {fontFamily: 'Saira Stencil One', fontSize: 25, color: color}
-			lbl.setShadow(0, 0, "black", 7, true, true))
-		@score.setScrollFactor(0).setDepth(2)
+		@hud = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
+			lbl = @scene.add.text 0, 0, '', {fontFamily: 'Saira Stencil One', fontSize: 25, color: color})
+		.setScrollFactor(0).setDepth(2)
+		.add(@scene.add.text 0, cfg.height-65, '', {fontFamily: 'Saira Stencil One', fontSize: 25, color: '#cb4154'})
+		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 
 	explode: () ->
 		super()
-		@score.destroy()
+		@hud.destroy()
 		@target.destroy()
 		@scene.cameras.main.fadeOut(1000)
 		@scene.cameras.main.shake()
@@ -82,7 +83,7 @@ class Player extends Body
 		return unless @alive
 		@trashed++
 		@trash_anim = @scene.tweens.add cfg =
-			targets: @score.last, scaleY: 0.0, yoyo: true, duration: 300, ease: 'Power1'
+			targets: @hud.list[1], scaleY: 0.0, yoyo: true, duration: 300, ease: 'Power1'
 
 	update: () ->
 		super()
@@ -97,10 +98,12 @@ class Player extends Body
 			@propel(200)
 			0x00FFFF
 		else 0x708090
+		# HUD update.
+		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.last.scaleY = 1; 'gray')
+		for lbl, idx in @hud.list[0..1]
+			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
+		@hud.last.setText("Threat: #{'⬛'.repeat(@scene.enemies)}")
 		# Finalization.
-		@score.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @score.last.scaleY = 1; 'gray')
-		for lbl, idx in @score.list
-			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}" 
 		@target.visible = true
 		@alive
 # -------------------- #
@@ -179,6 +182,7 @@ class MissileBase extends Body
 # -------------------- #
 class Game
 	self = null
+	rnd: Phaser.Math.Between
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
@@ -251,7 +255,6 @@ class Game
 		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
 		@scene.objects	= []
 		@scene.enemies	= 0
-		@spawnlag		= 0
 		@scene.objects.push @scene.player = new Player @scene, @app.config
 		# World setup.
 		[width, height] = [2500, 2500]
@@ -259,7 +262,7 @@ class Game
 		@scene.physics.world.setBounds	x, y, width, height
 		@scene.cameras.main.setBounds	x, y, width, height
 		# Legacy enemy.
-		@spawn @scene.player.model.x + 200, @scene.player.model.y + 200
+		@spawn @scene.player.model.x + 200 * [1, -1][@rnd 0, 1], @scene.player.model.y + 200 * [1, -1][@rnd 0, 1]
 		# Briefing.
 		lines = [
 			"That guiding systems looks pretty cheap", "It's a little tough to find ammo here"
@@ -268,22 +271,23 @@ class Game
 		]
 		@briefing?.destroy()
 		@briefing = @scene.add.text @scene.player.model.x, start_y = @scene.player.model.y - 30,
-			"...#{lines[Phaser.Math.Between 0, lines.length-1]}...", 
+			"...#{lines[@rnd 0, lines.length-1]}...", 
 				{fontFamily: 'Saira Stencil One', fontSize: 20, color: 'Cyan'}
 		@briefing.setOrigin(0.5, 0.5).setShadow(0, 0, "lightcoral", 7, true, true)
 		@scene.tweens.add cfg =
 			targets: @briefing, alpha: 0, duration: 1300, y: start_y + 40, ease: 'Sine.easeInOut'
 		# Finalization.
+		@spawnlag		= 0
 		@welcome?.destroy()
 		@space.rotation = 0
 		@scene.cameras.main.fadeIn(1000)
 
 	spawn: (x, y) ->
 		{width, height} = @scene.physics.world.bounds		
-		x = @scene.player.model.x + Phaser.Math.Between(@app.config.width / 2, width - @app.config.width)	 unless x?
-		y = @scene.player.model.y + Phaser.Math.Between(@app.config.height / 2, height - @app.config.height) unless y?
+		x = @scene.player.model.x + @rnd(@app.config.width / 2, width - @app.config.width)	 unless x?
+		y = @scene.player.model.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
 		@scene.objects.push @enemy = new MissileBase @scene, x, y
-		@spawnlag += 1000
+		@spawnlag += Math.max 0, 800 - @scene.player.trashed * 50
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
