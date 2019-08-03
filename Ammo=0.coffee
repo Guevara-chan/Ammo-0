@@ -5,18 +5,13 @@ class Body
 	constructor: (@sprite_id, @scene, x, y, trail_id) ->
 		# Init setup.
 		@model		= @scene.physics.add.existing @scene.add.container x, y, [@scene.add.image(0, 0, @sprite_id)]
-		@model.self	= @
 		@requiem	= @scene.sound.add("explode:#{@sprite_id}").on 'complete', (snd) -> snd.destroy()
+		@model.self	= @
 		# Trail setup.
 		if trail_id?
-			@engine 
-			(@trail = @scene[trail_id].createEmitter cfg =
-				speed: 100
-				scale: { start: 0.02, end: 0 }
-				angle: () => @model.angle + 90
-				blendMode: 'ADD'
-				on: false
-			).startFollow @model, true, 0.05, 0.05
+			@trail = @scene[trail_id].createEmitter cfg =
+				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: () => @model.angle + 90
+			.startFollow @model, true, 0.05, 0.05
 
 	orient: (dest, speed = 200) ->
 		angle = Phaser.Math.Angle.Between(@model.x, @model.y, dest.x, dest.y﻿)﻿
@@ -34,9 +29,7 @@ class Body
 
 	explode: (magnitude = 50) ->
 		@explosion  = @scene.explode.createEmitter cfg =
-			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }
-			scale: { start: 0.1, end: 0 }
-			blendMode: 'ADD'
+			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }, scale: { start: 0.1, end: 0 }, blendMode: 'ADD'
 		@explosion.explode(magnitude * 2, @model.x, @model.y)
 		@model.destroy()
 		@trail?.stopFollow().stop()
@@ -68,14 +61,8 @@ class Player extends Body
 			@scene.add.line(cfg.width / 2, 0, 0, 0, cfg.width * 3, 0, 0x50C878, 0.1),
 			@scene.add.line(0, -cfg.height / 2, 0, 0, 0, cfg.height * 3, 0x50C878, 0.1)]
 		@scene.tweens.add cfg =
-			targets: @target.first
-			scaleX: 0.17
-			scaleY: 0.17
-			ease: 'Power1'
-			duration: 300
-			repeat: -1
-			yoyo: true
-			repeatDelay: 500
+			targets: @target.first, scaleX: 0.17, scaleY: 0.17, ease: 'Power1'
+			duration: 300, repeat: -1, yoyo: true, repeatDelay: 500
 		# Finalization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@target.visible = false
@@ -95,11 +82,7 @@ class Player extends Body
 		return unless @alive
 		@trashed++
 		@trash_anim = @scene.tweens.add cfg =
-			targets: @score.last,
-			scaleY:		0.0
-			yoyo:		true
-			duration:	300
-			ease:		'Power1'
+			targets: @score.last, scaleY: 0.0, yoyo: true, duration: 300, ease: 'Power1'
 
 	update: () ->
 		super()
@@ -230,9 +213,7 @@ class Game
 		@scene.spacecrafts = @scene.physics.add.group()
 		@space.setScrollFactor(0)
 		# Particle setup.
-		@scene.jet		= @scene.add.particles('jet')
-		@scene.explode	= @scene.add.particles('explode')
-		@scene.steam	= @scene.add.particles('steam')
+		@scene[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@scene.steam.setDepth(1)
 		# SFX switcher.
 		@muter = @scene.add.text @app.config.width - 60, 15, "", {fontSize: 35, color: 'Cyan'}
@@ -249,23 +230,17 @@ class Game
 		# Additional preparations.
 		@scene.input.setPollAlways true
 		document.getElementById('ui').style.visibility = 'visible'
-		# Finalization.
+		# Finalization (welcome GUI).
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
-				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
-			@scene.add.text(0, cfg.height/2-60, "[click anywhere]".repeat(15), 
-				{fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'})
-			@scene.add.text(0, -(cfg.height/2-60), "[click anywhere]".repeat(15), 
-				{fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'})]
-		for lbl, idx in @welcome.list[1..]
-			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)
+				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)]
+		for idx in [0..1]
+			console.log [1,-1][idx]*(cfg.height/2-60)
+			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), "[click anywhere]".repeat(15), font =
+				fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
+			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)				
 			@scene.tweens.add
-				targets: lbl
-				x: [-300, 300][idx]
-				yoyo: true
-				repeat: -1,
-				duration: 5000,
-				ease: 'Sine.easeInOut'
+				targets: lbl, x: [-300, 300][idx], yoyo: true, repeat: -1, duration: 5000, ease: 'Sine.easeInOut'
 		@space.setInteractive().once 'pointerdown', (() ->
 			@scene.cameras.main.fadeOut(1000); @scene.player = {alive: false}).bind @
 
@@ -285,13 +260,9 @@ class Game
 		@spawn @scene.player.model.x + 200, @scene.player.model.y + 200
 		# Briefing.
 		lines = [
-			"That guiding systems looks pretty cheap"
-			"It's a little tough to find ammo here"
-			"Pacifism is a form of violence"
-			"Rockets, rockets, rockets"
-			"That run will never end"
-			"Just another bad dream"
-			"Thy shalt not kill"
+			"That guiding systems looks pretty cheap", "It's a little tough to find ammo here"
+			"Pacifism is a form of violence", "Rockets, rockets, rockets", "That run will never end"
+			"Just another bad dream", "Thy shalt not kill"
 		]
 		@briefing?.destroy()
 		@briefing = @scene.add.text @scene.player.model.x, start_y = @scene.player.model.y - 30,
@@ -299,11 +270,7 @@ class Game
 				{fontFamily: 'Saira Stencil One', fontSize: 20, color: 'Cyan'}
 		@briefing.setOrigin(0.5, 0.5).setShadow(0, 0, "lightcoral", 7, true, true)
 		@scene.tweens.add cfg =
-			targets: @briefing,
-			alpha: 0
-			duration: 1300,
-			y: start_y + 40
-			ease: 'Sine.easeInOut'
+			targets: @briefing, alpha: 0, duration: 1300, y: start_y + 40, ease: 'Sine.easeInOut'
 		# Finalization.
 		@welcome?.destroy()
 		@space.rotation = 0
