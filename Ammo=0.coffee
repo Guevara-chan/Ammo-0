@@ -23,9 +23,9 @@ class Body
 		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse, @model.body.acceleration)
 		@trail?.start()
 
-	volume: () ->
+	volume: (hear = 1000) ->
 		volume: Math.max 0,
-			(700 - Phaser.Math.Distance.Between(@scene.player.model.x, @scene.player.model.y, @model.x, @model.y)) / 700
+			(hear - Phaser.Math.Distance.Between(@scene.player.model.x, @scene.player.model.y, @model.x, @model.y))/hear
 
 	explode: (magnitude = 50) ->
 		@explosion  = @scene.explode.createEmitter
@@ -182,6 +182,8 @@ class Game
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
+		window.resizeTo Math.max(window.innerWidth, width+20), Math.max(window.innerHeight, height+45)
+		window.moveTo (screen.width-window.outerWidth) / 2, (screen.height-window.outerHeight) / 2
 		@app = new Phaser.Game
 			type: Phaser.WEBGL, width: width, height: height, parent: 'vp'
 			scale: {mode: Phaser.Scale.EXACT_FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
@@ -190,9 +192,6 @@ class Game
 				default: 'arcade'
 				#arcade:
 					#debug: true
-		console.log @app
-		window.resizeTo Math.max(window.innerWidth, width+20), Math.max(window.innerHeight, height+45)
-		window.moveTo (screen.width-window.outerWidth) / 2, (screen.height-window.outerHeight) / 2
 		self = @
 
 	preload: () ->
@@ -250,8 +249,9 @@ class Game
 		# Init setup.
 		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
 		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
-		@scene.objects = []
-		@scene.enemies = 0
+		@scene.objects	= []
+		@scene.enemies	= 0
+		@spawnlag		= 0
 		@scene.objects.push @scene.player = new Player @scene, @app.config
 		# World setup.
 		[width, height] = [2500, 2500]
@@ -283,6 +283,7 @@ class Game
 		x = @scene.player.model.x + Phaser.Math.Between(@app.config.width / 2, width - @app.config.width)	 unless x?
 		y = @scene.player.model.y + Phaser.Math.Between(@app.config.height / 2, height - @app.config.height) unless y?
 		@scene.objects.push @enemy = new MissileBase @scene, x, y
+		@spawnlag += 1000
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
@@ -290,7 +291,7 @@ class Game
 		else return @space.rotation -= 0.001 unless @scene.player?
 		if @scene.player.alive
 			@scene.pending = []
-			if @scene.enemies < 5 then @spawn()
+			if @scene.enemies < 5 and (@spawnlag = Math.max 0, @spawnlag-1) is 0 then @spawn()
 			@scene.objects = @scene.objects.filter (obj) -> obj.alive and obj.update()
 			@scene.objects = @scene.objects.concat @scene.pending
 		else @init(0)
