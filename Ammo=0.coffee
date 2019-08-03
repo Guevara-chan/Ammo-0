@@ -157,7 +157,6 @@ class MissileBase extends Body
 		super 'mbase', scene, x, y
 		@model.setScale(0.0, 0.2).alpha = 0
 		@model.body.setOffset(-200, -200).setSize(400, 400)
-		@puff = @scene.sound.add "steam"
 		# Additional setup.
 		@scene.spacecrafts.add(@model)
 		@scene.enemies++
@@ -189,7 +188,7 @@ class MissileBase extends Body
 		if @reload++ is 100
 			@scene.pending.push new Missile @scene, @, @scene.player
 			@silo.explode(80, @model.x, @model.y)
-			@puff.play @volume()
+			@scene.sound.add("steam").on('completed', (snd) -> snd.destroy()).play(@volume())
 			@reload = 0
 		@scene.physics.world.overlap @model, @scene.player.model, (bse, plr) ->
 			bse.self.explode()
