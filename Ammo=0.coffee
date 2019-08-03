@@ -247,7 +247,16 @@ class Game
 		# Finalization (welcome GUI).
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
-				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)]
+				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
+			author = @scene.add.text(cfg.width / 2 - 220, cfg.height / 2 - 30, "「by Victoria A. Guevara」", 
+				{fontFamily: 'Titillium Web', fontSize: 20, color: 'red'}).setInteractive()
+			.setStroke('#202020', 2)
+			.on('pointerover',	() => author.setShadow(0, 0, "lightsalmon", 3, true, true))
+			.on('pointerout',	() => author.setShadow(0, 0, "lightsalmon", 0, true, true))
+			.on('pointerdown',	() -> window.open("https://vk.com/guevara_chan"))
+			]
+		@scene.tweens.add
+			targets: author, alpha: 0.4, yoyo: true, repeat: -1, duration: 1000, ease: 'Sine.easeInOut'
 		for idx in [0..1]
 			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), "[click anywhere]".repeat(15), font =
 				fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
