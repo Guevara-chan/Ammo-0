@@ -251,7 +251,7 @@ class Game
 		# Welcome GUI: desc.
 		for hint, idx in ["「v0.02: Proto」", "「by Victoria A. Guevara」"]
 			@welcome.add label = @scene.add.text([-512, 282][idx], (cfg.height/2-20)*[-1,1][idx],
-				hint, {fontFamily: 'Titillium Web', fontSize: 20}).setInteractive().setOrigin(0,0.5)
+				hint, {fontFamily: 'Titillium Web', fontSize: 20}).setInteractive({useHandCursor:true}).setOrigin(0,0.5)
 			label.setStroke('#202020', 2)
 			.on('pointerover',	(() -> @setShadow(0, 0, "goldenrod", 3, true, true).setColor 'gold').bind label)
 			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'orangered').bind label)
