@@ -113,8 +113,9 @@ class Player extends Body
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
 		# HUD update: mission clock.
-		flytime = (new Date() - @departure) // 1000
-		@hud.list[2].setText [flytime // 60, flytime % 60].map((f) -> "#{f}".padStart(2, '0')).join ':'
+		msecs = new Date() - @departure 
+		secs = msecs // 1000
+		@hud.list[2].setText [secs // 60, secs % 60].map((f) -> "#{f}".padStart(2, '0')).join ':.'[msecs // 500 % 2]
 		# HUD update: threat level.
 		if @scene.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
 		else 
