@@ -77,14 +77,17 @@ class Player extends Body
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
-		@hud.add(@scene.add.text(cfg.width-15, cfg.height-15, '', hud_font).setOrigin(1, 1))
+		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5))
 		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
+		@heartbeat = @scene.tweens.add
+			targets: @hud.list[4], scaleX: 1.2, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 		# Finzalization.
 		@departure = new Date()
 
 	explode: () ->
 		super()
 		# HUD replacement.
+		@heartbeat.repeatDelay = 0
 		@scene.postmortem = @scene.add.container 1024/2, 768/2, [
 			@scene.add.text(0, 0, @hud.list[2].text.replace('.', ':')[2..], 
 				{fontFamily: 'Saira Stencil One', fontSize: 100, color: 'crimson'}).setOrigin(0.5, 1)
