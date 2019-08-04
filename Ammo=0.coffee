@@ -155,7 +155,7 @@ class Missile extends Body
 	constructor: (scene, emitter, @target) ->
 		super 'rocket', scene, emitter.model.x, emitter.model.y, 'jet'
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
-		@model.body.setMaxVelocity(110).setSize(100, 300).setOffset(-50, -150)
+		@model.body.setMaxVelocity(110).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
 		@emitter = emitter
 
 	explode: () ->
@@ -167,6 +167,7 @@ class Missile extends Body
 	update: () ->
 		super()
 		if @fuel-- > 0
+			@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
 			@orient @target.model
 			@propel(200)
 			@fused = true if not @fused and not @scene.physics.world.overlap(@model, @emitter.model)
@@ -236,8 +237,8 @@ class Game
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
-				#arcade:
-					#debug: true
+				# arcade:
+				# 	debug: true
 		self = @
 
 	preload: () ->
