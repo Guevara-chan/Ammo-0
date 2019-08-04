@@ -84,9 +84,9 @@ class Player extends Body
 	explode: () ->
 		super()
 		# HUD replacement.
-		@scene.postmortem = @scene.add.text(1024/2, 768/2, @hud.list[2].text, 
+		@scene.postmortem = @scene.add.text(1024/2, 768/2, @hud.list[2].text.replace('.', ':'), 
 			{fontFamily: 'Saira Stencil One', fontSize: 125, color: 'crimson'}).setOrigin(0.5, 0.5).setScrollFactor(0)
-		.setAlpha(0).setScale(1, 0).setShadow 
+		.setAlpha(0).setScale(1, 0).setShadow(0, 0, "#cb4154", 7, true, true)
 		@scene.tweens.add
 			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
 		@scene.tweens.add
@@ -123,7 +123,8 @@ class Player extends Body
 		# HUD update: mission clock.
 		msecs	= new Date() - @departure 
 		secs	= msecs // 1000
-		@hud.list[2].setText [secs // 60, secs % 60].map((f) -> "#{f}".padStart(2, '0')).join ':.'[msecs // 500 % 2]
+		@hud.list[2].setText ['🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛'][msecs // 100 % 12] +
+			[secs // 60, secs % 60].map((f) -> "#{f}".padStart(2, '0')).join ':.'[msecs // 500 % 2]
 		# HUD update: threat level.
 		if @scene.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
 		else 
