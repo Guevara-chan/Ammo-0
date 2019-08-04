@@ -145,6 +145,9 @@ class Missile extends Body
 		@alive
 # -------------------- #
 class MissileBase extends Body
+	ammo: Infinity
+
+	# --Methods goes here.
 	constructor: (scene, x, y) ->
 		# Model setup
 		super 'mbase', scene, x, y
@@ -178,7 +181,7 @@ class MissileBase extends Body
 		super()
 		return true unless @teleport.progress is 1
 		@model.body.setAngularVelocity(100)
-		if @reload++ is 100
+		if @reload++ is 100 and @ammo--
 			@scene.pending.push new Missile @scene, @, @scene.player
 			@silo.explode(80, @model.x, @model.y)
 			@scene.sound.add("steam").on('completed', (snd) -> snd.destroy()).play(@volume())
@@ -230,11 +233,13 @@ class Game
 		@scene[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@scene.steam.setDepth(1)
 		# SFX switcher.
-		@muter = @scene.add.text @app.config.width - 60, 15, "", {fontSize: 35, color: 'Cyan'}
+		@muter = @scene.add.text @app.config.width - 60, -20, "", {fontSize: 35, color: 'Cyan'}
 		@muter.setScrollFactor(0).setInteractive().setDepth(2).state = 0
 		@muter.on 'pointerdown', (() ->
-			@scene.sound.setMute @state; @setText ["🔈", "🔊"][@state = 1 - @state]).bind @muter
+			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]).bind @muter
 		@muter.emit('pointerdown')
+		@muter.on('pointerover',(() -> @setShadow(0, 0, "cyan", 5, true, true)).bind @muter)
+		@muter.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1)).bind @muter)
 		# Ambient music.
 		@track_list	= []
 		random = (() -> @[Phaser.Math.Between 0, @length-1].play()).bind @track_list
@@ -254,7 +259,7 @@ class Game
 			@welcome.add label = @scene.add.text([-512, 282][idx], (cfg.height/2-20)*[-1,1][idx],
 				hint, {fontFamily: 'Titillium Web', fontSize: 20}).setInteractive({useHandCursor:true}).setOrigin(0,0.5)
 			label.setStroke('#202020', 2)
-			.on('pointerover',	(() -> @setShadow(0, 0, "goldenrod", 5, true, true).setColor 'orange').bind label)
+			.on('pointerover',	(() -> @setShadow(0, 0, "goldenrod", 5, true, true).setColor 'orangered').bind label)
 			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'violet').bind label)
 			.on 'pointerdown', ((url) -> window.open url).bind @, 
 				["https://github.com/Guevara-chan/Ammo-0", "https://vk.com/guevara_chan"][idx]
