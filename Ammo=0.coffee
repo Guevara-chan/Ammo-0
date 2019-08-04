@@ -71,7 +71,7 @@ class Player extends Body
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@target.visible = false
 		hud_font = {fontFamily: 'Saira Stencil One', fontSize: 25}
-		@hud = @scene.add.container 0, 0, (for color in ['gray', 'slategray']
+		@hud = @scene.add.container 0, 0, (for color in ['gray', '#C46210']
 			lbl = @scene.add.text(15, 15, '', hud_font).setColor(color))
 		.setScrollFactor(0).setDepth(2)
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
