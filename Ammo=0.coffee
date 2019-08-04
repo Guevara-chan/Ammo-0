@@ -324,8 +324,9 @@ class Game
 		# Briefing.
 		lines = [
 			"That guiding systems looks pretty cheap", "One day space will become endless again"
-			"It's a little tough to find ammo here", "Pacifism is a form of violence", "Rockets, rockets, rockets",
-			"That run will never end", "Just another bad dream", "Thou shalt not kill"
+			"It's a little tough to find ammo here", "Eventually, I see this world crimson",
+			"Pacifism is a form of violence", "Rockets, rockets, rockets", "That run will never end",
+			"Just another bad dream", "Thou shalt not kill"
 		]
 		@briefing?.destroy()
 		@briefing = @scene.add.text @scene.player.model.x, start_y = @scene.player.model.y - 30,
