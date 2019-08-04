@@ -71,13 +71,14 @@ class Player extends Body
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@target.visible = false
 		hud_font = {fontFamily: 'Saira Stencil One', fontSize: 25}
-		@hud = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
-			lbl = @scene.add.text(0, 0, '', hud_font).setColor(color))
+		@hud = @scene.add.container 0, 0, (for color in ['gray', 'slategray']
+			lbl = @scene.add.text(15, 15, '', hud_font).setColor(color))
 		.setScrollFactor(0).setDepth(2)
-		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setOrigin(0.5, 0)
-		.add(@scene.add.text 0, cfg.height-65, '', hud_font)
+		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
+		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
-		@hud.add @scene.add.rectangle(0, cfg.height-35, 0, 0, 0xfffff).setOrigin(0, 0.5)
+		@hud.add(@scene.add.text(cfg.width-15, cfg.height-15, '', hud_font).setOrigin(1, 1))
+		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
 		# Finzalization.
 		@departure = new Date()
 
@@ -140,6 +141,8 @@ class Player extends Body
 			@hud.list[3].setText("Threat: #{'🞖'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
 		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
+		# HUD update: ammo counter.
+		@hud.list[4].setColor('#cb4154').setShadow(0, 0, "crimson", 7, true, true).setText "Ammo:#{@ammo}"
 		# Finalization.
 		@target.visible = true
 		@alive
