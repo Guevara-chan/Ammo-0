@@ -85,9 +85,9 @@ class Player extends Body
 		super()
 		@scene.postmortem = @scene.add.text(1024/2, 768/2, @hud.list[2].text, 
 			{fontFamily: 'Saira Stencil One', fontSize: 125, color: 'crimson'}).setOrigin(0.5, 0.5).setScrollFactor(0)
-		.setAlpha(0)
+		.setAlpha(0).setScale(1, 0)
 		@trash_anim = @scene.tweens.add
-			targets: @scene.postmortem, alpha: 1, yoyo: true, duration: 500, ease: 'Power1'
+			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
 		@hud.destroy()
 		@target.destroy()
 		@scene.cameras.main.fadeOut(1000)
