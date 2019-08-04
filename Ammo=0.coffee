@@ -124,7 +124,7 @@ class Player extends Body
 			0x00FFFF
 		else 0x708090
 		# HUD update: trash counter.
-		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud[1].scaleY = 1; 'gray')
+		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}☠"
 		# HUD update: mission clock.
