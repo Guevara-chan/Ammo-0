@@ -249,6 +249,7 @@ class Game
 		# Additional preparations.
 		@scene.input.setPollAlways true
 		document.getElementById('ui').style.visibility = 'visible'
+		@scene.game.onPause = () -> alert "!"
 		# Welcome GUI: logo.
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
