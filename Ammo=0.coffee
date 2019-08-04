@@ -254,7 +254,7 @@ class Game
 				hint, {fontFamily: 'Titillium Web', fontSize: 20}).setInteractive({useHandCursor:true}).setOrigin(0,0.5)
 			label.setStroke('#202020', 2)
 			.on('pointerover',	(() -> @setShadow(0, 0, "goldenrod", 3, true, true).setColor 'gold').bind label)
-			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'orangered').bind label)
+			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'gold').bind label)
 			.on 'pointerdown', ((url) -> window.open url).bind @, 
 				["https://github.com/Guevara-chan/Ammo-0", "https://vk.com/guevara_chan"][idx]
 			label.setAlpha [0.4, 1][idx]
