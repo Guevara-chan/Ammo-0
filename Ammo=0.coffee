@@ -238,8 +238,8 @@ class Game
 		@muter.on 'pointerdown', (() ->
 			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]).bind @muter
 		@muter.emit('pointerdown')
-		@muter.on('pointerover',(() -> @setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind @muter)
-		@muter.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind @muter)
+		@muter.on('pointerover',(-> @setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind @muter)
+		@muter.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind @muter)
 		# Ambient music.
 		@track_list	= []
 		random = (() -> @[Phaser.Math.Between 0, @length-1].play()).bind @track_list
@@ -277,7 +277,7 @@ class Game
 		@space.setInteractive().once 'pointerdown', (() ->
 			@scene.cameras.main.fadeOut(1000); @scene.player = {alive: false}).bind @
 
-	init: () ->
+	init: (@zone = 'survival:medium') ->
 		# Init setup.
 		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
 		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
@@ -290,7 +290,8 @@ class Game
 		@scene.physics.world.setBounds	x, y, width, height
 		@scene.cameras.main.setBounds	x, y, width, height
 		# Legacy enemy.
-		@spawn @scene.player.model.x + 200 * [1, -1][@rnd 0, 1], @scene.player.model.y + 200 * [1, -1][@rnd 0, 1]
+		if @zone.startsWith 'survival'
+			@spawn @scene.player.model.x + 200 * [1, -1][@rnd 0, 1], @scene.player.model.y + 200 * [1, -1][@rnd 0, 1]
 		# Briefing.
 		lines = [
 			"That guiding systems looks pretty cheap", "It's a little tough to find ammo here"
@@ -323,10 +324,11 @@ class Game
 		else return @space.rotation -= 0.001 unless @scene.player?
 		if @scene.player.alive
 			@scene.pending = []
-			if @scene.enemies < 5 and (@scene.spawnlag = Math.max 0, @scene.spawnlag-1) is 0 then @spawn()
+			if @zone.startsWith('surv') and @scene.enemies < 5 and (@scene.spawnlag=Math.max 0, @scene.spawnlag-1) is 0
+				@spawn()
 			@scene.objects = @scene.objects.filter (obj) -> obj.alive and obj.update()
 			@scene.objects = @scene.objects.concat @scene.pending
-		else @init(0)
+		else @init()
 			
 # ==Main code==
 new Game()
