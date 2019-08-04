@@ -238,7 +238,7 @@ class Game
 		@muter.on 'pointerdown', (() ->
 			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]).bind @muter
 		@muter.emit('pointerdown')
-		@muter.on('pointerover',(() -> @setShadow(0, 0, "cyan", 5, true, true)).bind @muter)
+		@muter.on('pointerover',(() -> @setShadow(0, 0, "cyan", 7, true, true)).bind @muter)
 		@muter.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1)).bind @muter)
 		# Ambient music.
 		@track_list	= []
