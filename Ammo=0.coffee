@@ -253,8 +253,8 @@ class Game
 			@welcome.add label = @scene.add.text([-512, 282][idx], (cfg.height/2-20)*[-1,1][idx],
 				hint, {fontFamily: 'Titillium Web', fontSize: 20}).setInteractive({useHandCursor:true}).setOrigin(0,0.5)
 			label.setStroke('#202020', 2)
-			.on('pointerover',	(() -> @setShadow(0, 0, "goldenrod", 3, true, true).setColor 'gold').bind label)
-			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'gold').bind label)
+			.on('pointerover',	(() -> @setShadow(0, 0, "goldenrod", 5, true, true).setColor 'orange').bind label)
+			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'violet').bind label)
 			.on 'pointerdown', ((url) -> window.open url).bind @, 
 				["https://github.com/Guevara-chan/Ammo-0", "https://vk.com/guevara_chan"][idx]
 			label.setAlpha [0.4, 1][idx]
