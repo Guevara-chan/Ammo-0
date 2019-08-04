@@ -233,13 +233,13 @@ class Game
 		@scene[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@scene.steam.setDepth(1)
 		# SFX switcher.
-		@muter = @scene.add.text @app.config.width - 60, -20, "", {fontSize: 35, color: 'Cyan'}
-		@muter.setScrollFactor(0).setInteractive().setDepth(2).state = 0
+		@muter = @scene.add.text @app.config.width - 35, 14, "", {fontSize: 35, color: 'Cyan'}
+		@muter.setScrollFactor(0).setInteractive().setDepth(2).setOrigin(0.5, 0.5).state = 0
 		@muter.on 'pointerdown', (() ->
 			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]).bind @muter
 		@muter.emit('pointerdown')
-		@muter.on('pointerover',(() -> @setShadow(0, 0, "cyan", 7, true, true)).bind @muter)
-		@muter.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1)).bind @muter)
+		@muter.on('pointerover',(() -> @setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind @muter)
+		@muter.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind @muter)
 		# Ambient music.
 		@track_list	= []
 		random = (() -> @[Phaser.Math.Between 0, @length-1].play()).bind @track_list
@@ -249,7 +249,6 @@ class Game
 		# Additional preparations.
 		@scene.input.setPollAlways true
 		document.getElementById('ui').style.visibility = 'visible'
-		@scene.game.onPause = () -> alert "!"
 		# Welcome GUI: logo.
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
@@ -260,8 +259,8 @@ class Game
 			@welcome.add label = @scene.add.text((cfg.width/2)*[-1,1][idx], (cfg.height/2-20)*[-1,1][idx],
 				hint, {fontFamily:'Titillium Web', fontSize:20}).setInteractive({useHandCursor:true}).setOrigin(idx,0.5)
 			label.setStroke('#202020', 2)
-			.on('pointerover',	(() -> @setShadow(0, 0, "goldenrod", 5, true, true).setColor 'orangered').bind label)
-			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'violet').bind label)
+			.on('pointerover',	(() -> @setShadow(0, 0, "darkcyan", 3, true, true).setColor 'cyan').bind label)
+			.on('pointerout',	(() -> @setShadow(0, 0, "violet", 3, true, true).setColor 'black').bind label)
 			.on 'pointerdown', ((url) -> window.open url).bind @, 
 				["https://github.com/Guevara-chan/Ammo-0", "https://vk.com/guevara_chan"][idx]
 			label.setAlpha [0.4, 1][idx]
