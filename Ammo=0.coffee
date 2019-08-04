@@ -74,7 +74,7 @@ class Player extends Body
 		@hud = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
 			lbl = @scene.add.text(0, 0, '', hud_font).setColor(color))
 		.setScrollFactor(0).setDepth(2)
-		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setColor('goldenrod').setOrigin(0.5, 0)
+		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setColor('#C46210').setOrigin(0.5, 0)
 		.add(@scene.add.text 0, cfg.height-65, '', hud_font)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		@hud.add @scene.add.rectangle(0, cfg.height-35, 0, 0, 0xfffff).setOrigin(0, 0.5)
@@ -91,8 +91,7 @@ class Player extends Body
 			@scene.add.text(0, 0, "☠"+@trashed, 
 				{fontFamily: 'Saira Stencil One', fontSize: 100, color: 'crimson'}).setOrigin(0.5, 0)
 					.setShadow(0, 0, "#cb4154", 7, true, true)
-			@scene.add.rectangle(0, 0, 250, 5, 0xDC143C).setOrigin(0.5, 0.5)
-
+			@scene.add.rectangle(0, 0, 225, 5, 0xDC143C).setOrigin(0.5, 0.5)
 		]
 		@scene.postmortem.setScrollFactor(0).setAlpha(0).setScale(1, 0)		
 		@scene.tweens.add
@@ -137,7 +136,7 @@ class Player extends Body
 		if @scene.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
 		else 
 			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
-			@hud.list[3].setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
+			@hud.list[3].setText("Threat: #{'🞖'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
 		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
 		# Finalization.
