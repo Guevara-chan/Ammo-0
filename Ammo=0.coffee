@@ -8,20 +8,20 @@ class Body
 		@model		= @scene.physics.add.existing @scene.add.container x, y, [@scene.add.image(0, 0, @sprite_id)]
 		@requiem	= @scene.sound.add("explode:#{@sprite_id}").on 'complete', (snd) -> snd.destroy()
 		@model.self	= @
-		@model.first.rotation = -@model.rotation = -3.14/2
 		# Trail setup.
 		if trail_id?
 			@trail = @scene[trail_id].createEmitter cfg =
-				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: 0
+				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: () => @model.angle + 90
 			.startFollow @model, true, 0.05, 0.05
 
 	orient: (dest, speed = 200) ->
-		delta = @model.rotation - Phaser.Math.Angle.Between(@model.x, @model.y, dest.x, dest.y﻿)﻿
+		angle = Phaser.Math.Angle.Between(@model.x, @model.y, dest.x, dest.y﻿)﻿
+		delta = @model.rotation - angle - 3.14 * (if angle > 3.14 / 2 then -1.5 else 0.5)
 		if Math.abs(delta) > 3.14 then delta = -delta
 		@model.body.setAngularVelocity -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
 
 	propel: (impulse) ->
-		@scene.physics.velocityFromRotation(@model.rotation, impulse, @model.body.acceleration)
+		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse, @model.body.acceleration)
 		@trail?.start()
 
 	shoot: (ammo, target) ->
@@ -153,15 +153,15 @@ class Missile extends Body
 
 	# --Methods goes here.
 	constructor: (scene, emitter, @target) ->
-		super 'rocket', scene, emitter.model.x, emitter.model.y, 'jet' # 90 degree rotation.
-		@model.setScale(0.05, 0.15).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0)
-		@model.body.setMaxVelocity(110).setSize(300, 100).setOffset(-150, -50)
+		super 'rocket', scene, emitter.model.x, emitter.model.y, 'jet'
+		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
+		@model.body.setMaxVelocity(110).setSize(100, 300).setOffset(-50, -150)
 		@emitter = emitter
 
 	explode: () ->
 		super()
 
-	orient: (dest, speed = 200) ->
+	orient: (dest, speed = 400) ->
 		super dest, speed
 
 	update: () ->
@@ -183,7 +183,7 @@ class MissileBase extends Body
 	constructor: (scene, x, y) ->
 		# Model setup
 		super 'mbase', scene, x, y
-		@model.setScale(0.2, 0.0).alpha = 0 # 90 degree rotation.
+		@model.setScale(0.0, 0.2).alpha = 0
 		@model.body.setOffset(-200, -200).setSize(400, 400)
 		# Additional setup.
 		@scene.spacecrafts.add(@model)
@@ -199,7 +199,7 @@ class MissileBase extends Body
 		# Appearing.
 		@teleport = @scene.tweens.add cfg =
 			targets: @model,
-			scaleY: 0.2
+			scaleX: 0.2
 			alpha: 1 # { start: 0, end: 1}
 			duration: 1000,
 			ease: 'Sine.easeInOut'
@@ -236,8 +236,8 @@ class Game
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
-				# arcade:
-				# 	debug: true
+				#arcade:
+					#debug: true
 		self = @
 
 	preload: () ->
