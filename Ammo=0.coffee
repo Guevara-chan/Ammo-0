@@ -43,6 +43,7 @@ class Body
 		@trail?.followOffset.y = -@model.body.acceleration.y / 10
 # -------------------- #
 class Player extends Body
+	ammo:	 0
 	trashed: 0
 
 	# --Methods goes here.
