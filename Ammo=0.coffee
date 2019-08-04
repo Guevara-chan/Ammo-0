@@ -74,7 +74,7 @@ class Player extends Body
 		@hud = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
 			lbl = @scene.add.text(0, 0, '', hud_font).setColor(color))
 		.setScrollFactor(0).setDepth(2)
-		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setColor('violet').setOrigin(0.5, 0)
+		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setColor('goldenrod').setOrigin(0.5, 0)
 		.add(@scene.add.text 0, cfg.height-65, '', hud_font)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		@hud.add @scene.add.rectangle(0, cfg.height-35, 0, 0, 0xfffff).setOrigin(0, 0.5)
@@ -83,6 +83,11 @@ class Player extends Body
 
 	explode: () ->
 		super()
+		@scene.postmortem = @scene.add.text(1024/2, 768/2, @hud.list[2].text, 
+			{fontFamily: 'Saira Stencil One', fontSize: 125, color: 'crimson'}).setOrigin(0.5, 0.5).setScrollFactor(0)
+		.setAlpha(0)
+		@trash_anim = @scene.tweens.add
+			targets: @scene.postmortem, alpha: 1, yoyo: true, duration: 500, ease: 'Power1'
 		@hud.destroy()
 		@target.destroy()
 		@scene.cameras.main.fadeOut(1000)
@@ -113,8 +118,8 @@ class Player extends Body
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
 		# HUD update: mission clock.
-		msecs = new Date() - @departure 
-		secs = msecs // 1000
+		msecs	= new Date() - @departure 
+		secs	= msecs // 1000
 		@hud.list[2].setText [secs // 60, secs % 60].map((f) -> "#{f}".padStart(2, '0')).join ':.'[msecs // 500 % 2]
 		# HUD update: threat level.
 		if @scene.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
@@ -334,6 +339,7 @@ class Game
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
 		if @scene.cameras.main.fadeEffect.isRunning then return
 		else return @space.rotation -= 0.001 unless @scene.player?
+		@scene.postmortem?.destroy()
 		if @scene.player.alive
 			@scene.pending = []
 			switch @mode
