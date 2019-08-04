@@ -83,12 +83,15 @@ class Player extends Body
 
 	explode: () ->
 		super()
+		# HUD replacement.
 		@scene.postmortem = @scene.add.text(1024/2, 768/2, @hud.list[2].text, 
 			{fontFamily: 'Saira Stencil One', fontSize: 125, color: 'crimson'}).setOrigin(0.5, 0.5).setScrollFactor(0)
 		.setAlpha(0).setScale(1, 0)
-		@trash_anim = @scene.tweens.add
+		@scene.tweens.add
 			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
-		@hud.destroy()
+		@scene.tweens.add
+			targets: @hud, alpha: 0, duration: 333, ease: 'Power1', onComplete: (-> @destroy()).bind @hud
+		# Other stuff.
 		@target.destroy()
 		@scene.cameras.main.fadeOut(1000)
 		@scene.cameras.main.shake()
