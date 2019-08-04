@@ -74,7 +74,7 @@ class Player extends Body
 		@hud = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
 			lbl = @scene.add.text(0, 0, '', hud_font).setColor(color))
 		.setScrollFactor(0).setDepth(2)
-		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setColor('#C46210').setOrigin(0.5, 0)
+		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setOrigin(0.5, 0)
 		.add(@scene.add.text 0, cfg.height-65, '', hud_font)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		@hud.add @scene.add.rectangle(0, cfg.height-35, 0, 0, 0xfffff).setOrigin(0, 0.5)
@@ -132,6 +132,7 @@ class Player extends Body
 		secs	= msecs // 1000
 		@hud.list[2].setText ['🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛'][msecs // 100 % 12] +
 			[secs // 60, secs % 60].map((f) -> "#{f}".padStart(2, '0')).join ':.'[msecs // 500 % 2]
+		@hud.list[2].setColor('#f8' + Math.max(0x30, 0xef - secs).toString(16).padStart(2, '0').repeat(2))
 		# HUD update: threat level.
 		if @scene.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
 		else 
@@ -296,7 +297,7 @@ class Game
 			label.emit('pointerout')
 		# Welcome GUI: hints.
 		for idx in [0..1]
-			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), "[click anywhere]".repeat(15), font =
+			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), "[click anywhere]·".repeat(15), font =
 				fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
 			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)				
 			@scene.tweens.add
