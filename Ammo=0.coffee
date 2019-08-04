@@ -1,5 +1,6 @@
 class Body
 	alive:	true
+	ammo:	0
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @scene, x, y, trail_id) ->
@@ -23,6 +24,9 @@ class Body
 		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse, @model.body.acceleration)
 		@trail?.start()
 
+	shoot: (ammo, target) ->
+		if --@ammo > 0 then @scene.pending.push new ammo @scene, @, target
+
 	volume: (hear = 1000) ->
 		volume: Math.max 0,
 			(hear - Phaser.Math.Distance.Between(@scene.player.model.x, @scene.player.model.y, @model.x, @model.y))/hear
@@ -43,7 +47,6 @@ class Body
 		@trail?.followOffset.y = -@model.body.acceleration.y / 10
 # -------------------- #
 class Player extends Body
-	ammo:	 0
 	trashed: 0
 
 	# --Methods goes here.
@@ -181,8 +184,7 @@ class MissileBase extends Body
 		super()
 		return true unless @teleport.progress is 1
 		@model.body.setAngularVelocity(100)
-		if @reload++ is 100 and @ammo--
-			@scene.pending.push new Missile @scene, @, @scene.player
+		if @reload++ is 100 and @shoot(Missile, @scene.player)
 			@silo.explode(80, @model.x, @model.y)
 			@scene.sound.add("steam").on('completed', (snd) -> snd.destroy()).play(@volume())
 			@reload = 0
