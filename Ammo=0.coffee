@@ -84,9 +84,15 @@ class Player extends Body
 	explode: () ->
 		super()
 		# HUD replacement.
-		@scene.postmortem = @scene.add.text(1024/2, 768/2, @hud.list[2].text.replace('.', ':'), 
-			{fontFamily: 'Saira Stencil One', fontSize: 125, color: 'crimson'}).setOrigin(0.5, 0.5).setScrollFactor(0)
-		.setAlpha(0).setScale(1, 0).setShadow(0, 0, "#cb4154", 7, true, true)
+		@scene.postmortem = @scene.add.container 1024/2, 768/2, [
+			@scene.add.text(0, 0, @hud.list[2].text.replace('.', ':')[2..], 
+				{fontFamily: 'Saira Stencil One', fontSize: 100, color: 'crimson'}).setOrigin(0.5, 1)
+					.setShadow(0, 0, "#cb4154", 7, true, true)
+			@scene.add.text(0, 0, "☠"+@trashed, 
+				{fontFamily: 'Saira Stencil One', fontSize: 100, color: 'crimson'}).setOrigin(0.5, 0)
+					.setShadow(0, 0, "#cb4154", 7, true, true)
+		]
+		@scene.postmortem.setScrollFactor(0).setAlpha(0).setScale(1, 0)		
 		@scene.tweens.add
 			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
 		@scene.tweens.add
