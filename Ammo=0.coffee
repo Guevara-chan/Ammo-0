@@ -161,7 +161,7 @@ class Missile extends Body
 	explode: () ->
 		super()
 
-	orient: (dest, speed = 400) ->
+	orient: (dest, speed = 90) ->
 		super dest, speed
 
 	update: () ->
