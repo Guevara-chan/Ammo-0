@@ -186,7 +186,7 @@ class MissileBase extends Body
 	constructor: (scene, x, y) ->
 		# Model setup
 		super 'mbase', scene, x, y
-		@model.setScale(0.0, 0.2).alpha = 0
+		@model.setScale(0.0, 0.3).alpha = 0
 		@model.body.setOffset(-200, -200).setSize(400, 400)
 		# Additional setup.
 		@scene.spacecrafts.add(@model)
