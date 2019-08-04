@@ -291,7 +291,7 @@ class Game
 		@scene.tweens.add
 			targets: @welcome.first, scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 		# Welcome GUI: desc.
-		for hint, idx in ["「v0.02: Proto」", "「by Victoria A. Guevara」"]
+		for hint, idx in ["「v0.03: Proto」", "「by Victoria A. Guevara」"]
 			@welcome.add label = @scene.add.text((cfg.width/2)*[-1,1][idx], (cfg.height/2-20)*[-1,1][idx],
 				hint, {fontFamily:'Titillium Web', fontSize:20}).setInteractive({useHandCursor:true}).setOrigin(idx,0.5)
 			label.setStroke('#202020', 2)
