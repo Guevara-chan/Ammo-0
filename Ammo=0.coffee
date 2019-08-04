@@ -67,15 +67,19 @@ class Player extends Body
 		@scene.tweens.add
 			targets: @target.first, scaleX: 0.17, scaleY: 0.17, ease: 'Power1'
 			duration: 300, repeat: -1, yoyo: true, repeatDelay: 500
-		# Finalization.
+		# HUD setup.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@target.visible = false
+		hud_font = {fontFamily: 'Saira Stencil One', fontSize: 25}
 		@hud = @scene.add.container 15, 15, (for color in ['gray', 'slategray']
-			lbl = @scene.add.text 0, 0, '', {fontFamily: 'Saira Stencil One', fontSize: 25, color: color})
+			lbl = @scene.add.text(0, 0, '', hud_font).setColor(color))
 		.setScrollFactor(0).setDepth(2)
-		.add(@scene.add.text 0, cfg.height-65, '', {fontFamily: 'Saira Stencil One', fontSize: 25})
+		.add @scene.add.text(cfg.width / 2, 0, '', hud_font).setColor('violet').setOrigin(0.5, 0)
+		.add(@scene.add.text 0, cfg.height-65, '', hud_font)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
-		@hud.add(@scene.add.rectangle(0, cfg.height-35, 0, 0, 0xfffff).setOrigin(0, 0.5))
+		@hud.add @scene.add.rectangle(0, cfg.height-35, 0, 0, 0xfffff).setOrigin(0, 0.5)
+		# Finzalization.
+		@departure = new Date()
 
 	explode: () ->
 		super()
@@ -88,7 +92,7 @@ class Player extends Body
 		return unless @alive
 		@trashed++
 		@scene.spawnlag += Math.max 0, 300 - @scene.player.trashed * 15
-		@trash_anim = @scene.tweens.add cfg =
+		@trash_anim = @scene.tweens.add
 			targets: @hud.list[1], scaleY: 0.0, yoyo: true, duration: 300, ease: 'Power1'
 
 	update: () ->
@@ -104,16 +108,20 @@ class Player extends Body
 			@propel(200)
 			0x00FFFF
 		else 0x708090
-		# HUD update.
+		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.last.scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
-		if @scene.enemies is 0 then @hud.list[2].setText("No threat ?").setColor('#708090')
+		# HUD update: mission clock.
+		flytime = (new Date() - @departure) // 1000
+		@hud.list[2].setText [flytime // 60, flytime % 60].map((f) -> "#{f}".padStart(2, '0')).join ':'
+		# HUD update: threat level.
+		if @scene.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
 		else 
 			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
-			@hud.list[2].setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
+			@hud.list[3].setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
-		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[2].style.color[1..])
+		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
 		# Finalization.
 		@target.visible = true
 		@alive
