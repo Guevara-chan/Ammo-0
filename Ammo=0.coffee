@@ -257,8 +257,9 @@ class Game
 			.on('pointerout',	(() -> @setShadow(1, 1, "#330000", 1).setColor 'orangered').bind label)
 			.on 'pointerdown', ((url) -> window.open url).bind @, 
 				["https://github.com/Guevara-chan/Ammo-0", "https://vk.com/guevara_chan"][idx]
+			label.setAlpha [0.4, 1][idx]
 			@scene.tweens.add
-				targets: label, alpha: 0.4, yoyo: true, repeat: -1, duration: 1000, ease: 'Sine.easeInOut'
+				targets: label, alpha: [1, 0.4][idx], yoyo: true, repeat: -1, duration: 1000, ease: 'Sine.easeInOut'
 			label.emit('pointerout')
 		# Welcome GUI: hints.
 		for idx in [0..1]
