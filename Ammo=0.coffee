@@ -91,6 +91,8 @@ class Player extends Body
 			@scene.add.text(0, 0, "☠"+@trashed, 
 				{fontFamily: 'Saira Stencil One', fontSize: 100, color: 'crimson'}).setOrigin(0.5, 0)
 					.setShadow(0, 0, "#cb4154", 7, true, true)
+			@scene.add.rectangle(0, 0, 250, 5, 0xDC143C).setOrigin(0.5, 0.5)
+
 		]
 		@scene.postmortem.setScrollFactor(0).setAlpha(0).setScale(1, 0)		
 		@scene.tweens.add
@@ -125,7 +127,7 @@ class Player extends Body
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.last.scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
-			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}"
+			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}☠"
 		# HUD update: mission clock.
 		msecs	= new Date() - @departure 
 		secs	= msecs // 1000
