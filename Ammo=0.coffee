@@ -288,6 +288,8 @@ class Game
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
 				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
 			]
+		@scene.tweens.add
+			targets: @welcome.first, scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 		# Welcome GUI: desc.
 		for hint, idx in ["「v0.02: Proto」", "「by Victoria A. Guevara」"]
 			@welcome.add label = @scene.add.text((cfg.width/2)*[-1,1][idx], (cfg.height/2-20)*[-1,1][idx],
