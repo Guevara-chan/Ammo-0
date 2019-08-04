@@ -12,7 +12,7 @@ class Body
 		# Trail setup.
 		if trail_id?
 			@trail = @scene[trail_id].createEmitter cfg =
-				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: () => @model.angle + 90
+				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: 0
 			.startFollow @model, true, 0.05, 0.05
 
 	orient: (dest, speed = 200) ->
@@ -161,7 +161,7 @@ class Missile extends Body
 	explode: () ->
 		super()
 
-	orient: (dest, speed = 400) ->
+	orient: (dest, speed = 200) ->
 		super dest, speed
 
 	update: () ->
