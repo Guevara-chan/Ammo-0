@@ -109,7 +109,6 @@ class Player extends Body
 			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xDA,0xA5,0x20,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
 			@hud.list[2].setText("Threat: #{'⬛'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
-		console.log  parseInt("0x"+@hud.list[2].style.color[1..])
 		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[2].style.color[1..])
 		# Finalization.
 		@target.visible = true
@@ -244,20 +243,24 @@ class Game
 		# Additional preparations.
 		@scene.input.setPollAlways true
 		document.getElementById('ui').style.visibility = 'visible'
-		# Finalization (welcome GUI).
+		# Welcome GUI: logo.
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
 				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
-			author = @scene.add.text(cfg.width / 2 - 220, cfg.height / 2 - 30, "「by Victoria A. Guevara」", 
-				{fontFamily: 'Titillium Web', fontSize: 20, color: 'orangered'}).setInteractive()
-			.setStroke('#202020', 2)
-			.on('pointerover',	() => author.setShadow(0, 0, "goldenrod", 3, true, true))
-			.on('pointerout',	() => author.setShadow(1, 1, "#330000", 1))
-			.on('pointerdown',	() -> window.open("https://vk.com/guevara_chan"))
 			]
-		@welcome.last.emit('pointerout')
-		@scene.tweens.add
-			targets: author, alpha: 0.4, yoyo: true, repeat: -1, duration: 1000, ease: 'Sine.easeInOut'
+		# Welcome GUI: desc.
+		for hint, idx in ["「v0.02: Proto」", "「by Victoria A. Guevara」"]
+			@welcome.add label = @scene.add.text([-512, 282][idx], (cfg.height/2-20)*[-1,1][idx],
+				hint, {fontFamily: 'Titillium Web', fontSize: 20, color: 'orangered'}).setInteractive().setOrigin(0,0.5)
+			label.setStroke('#202020', 2)
+			.on('pointerover',	(() -> @setShadow 0, 0, "goldenrod", 3, true, true).bind label)
+			.on('pointerout',	(() -> @setShadow 1, 1, "#330000", 1).bind label)
+			.on 'pointerdown', ((url) -> window.open url).bind @, 
+				["https://github.com/Guevara-chan/Ammo-0", "https://vk.com/guevara_chan"][idx]
+			@scene.tweens.add
+				targets: label, alpha: 0.4, yoyo: true, repeat: -1, duration: 1000, ease: 'Sine.easeInOut'
+			label.emit('pointerout')
+		# Welcome GUI: hints.
 		for idx in [0..1]
 			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), "[click anywhere]".repeat(15), font =
 				fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
