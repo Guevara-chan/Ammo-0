@@ -337,12 +337,12 @@ class Game
 			"Just another bad dream", "Thou shalt not kill"
 		]
 		@briefing?.destroy()
-		@briefing = @scene.add.text @scene.player.model.x, start_y = @scene.player.model.y - 30,
+		@briefing = @scene.add.text @scene.player.model.x, @scene.player.model.y - 40,
 			"...#{lines[@rnd 0, lines.length-1]}...", 
 				{fontFamily: 'Saira Stencil One', fontSize: 20, color: 'Cyan'}
 		@briefing.setOrigin(0.5, 0.5).setShadow(0, 0, "lightcoral", 7, true, true)
 		@scene.tweens.add cfg =
-			targets: @briefing, alpha: 0, duration: 1300, y: start_y + 40, ease: 'Sine.easeInOut'
+			targets: @briefing, alpha: 0, duration: 1300, scaleX: 0.6, y: @scene.player.model.y, ease: 'Sine.easeInOut'
 		# Finalization.
 		@welcome?.destroy()
 		@scene.spawnlag	= 0
