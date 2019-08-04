@@ -15,5 +15,4 @@ Reported as being compeletely playable with _Mozilla Firefox_, _Edge_ and mobile
 # ⋮Brief spampling of weaponless warfare⋮
 ![image](https://user-images.githubusercontent.com/8768470/62426995-cf6fd900-b6f4-11e9-89aa-f86aba9c3f04.png)
 ![image](https://user-images.githubusercontent.com/8768470/62427895-d3a2f300-b702-11e9-8b65-b2b3a22579f6.png)
-![image](https://user-images.githubusercontent.com/8768470/62427208-19a68980-b6f8-11e9-9749-6a96c21c1796.png)
-
+![image](https://user-images.githubusercontent.com/8768470/62427938-44e2a600-b703-11e9-9a3e-55a8d0aded59.png)
