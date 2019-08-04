@@ -86,7 +86,7 @@ class Player extends Body
 		# HUD replacement.
 		@scene.postmortem = @scene.add.text(1024/2, 768/2, @hud.list[2].text, 
 			{fontFamily: 'Saira Stencil One', fontSize: 125, color: 'crimson'}).setOrigin(0.5, 0.5).setScrollFactor(0)
-		.setAlpha(0).setScale(1, 0)
+		.setAlpha(0).setScale(1, 0).setShadow 
 		@scene.tweens.add
 			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
 		@scene.tweens.add
@@ -314,9 +314,9 @@ class Game
 				@spawn @scene.player.model.x + 200 * [1,-1][@rnd 0, 1], @scene.player.model.y + 200 * [1,-1][@rnd 0, 1]
 		# Briefing.
 		lines = [
-			"That guiding systems looks pretty cheap", "It's a little tough to find ammo here"
-			"Pacifism is a form of violence", "Rockets, rockets, rockets", "That run will never end"
-			"Just another bad dream", "Thy shalt not kill"
+			"That guiding systems looks pretty cheap", "One day space will become endless again"
+			"It's a little tough to find ammo here", "Pacifism is a form of violence", "Rockets, rockets, rockets",
+			"That run will never end", "Just another bad dream", "Thou shalt not kill"
 		]
 		@briefing?.destroy()
 		@briefing = @scene.add.text @scene.player.model.x, start_y = @scene.player.model.y - 30,
