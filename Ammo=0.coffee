@@ -105,7 +105,7 @@ class Player extends Body
 				@scene.game.canvas.style.opacity = 0.5
 				document.getElementById('util_ui').style.zIndex = 1
 				@scene.scene.pause()
-			@setText "\n"+["", "⏸️"][@state = 1 - @state]
+			@setText "\n"+["", "❚❚"][@state = 1 - @state]
 		@hud.list[4].state = 0
 		@hud.list[4].emit('pointerdown')
 		# Hud setup (ammo counter, threat gauge)
