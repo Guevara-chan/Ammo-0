@@ -108,7 +108,7 @@ class Player extends Body
 				document.getElementById('util_ui').style.zIndex = 1
 				@scene.scene.pause()
 			@setText "\n"+["", "❚❚"][@state = 1 - @state]
-		@switch.setColor('dimgray').state = 0
+		@switch.setColor('gray').state = 0
 		@switch.emit('pointerdown')
 		# Hud setup (ammo counter, threat gauge)
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
@@ -140,6 +140,8 @@ class Player extends Body
 			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
 		@scene.tweens.add
 			targets: @hud, alpha: 0, duration: 333, ease: 'Power1', onComplete: (-> @destroy();@beat.remove()).bind @hud
+		# Record data.
+		@scene.postmortem.record = {time: new Date() - @departure, trashed: @trashed}
 		# Other stuff.
 		@target.destroy()
 		@scene.cameras.main.fadeOut(1000)
