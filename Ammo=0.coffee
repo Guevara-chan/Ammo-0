@@ -21,7 +21,15 @@ class Body
 			.startFollow @model, true, 0.05, 0.05
 
 	orient: (dest, speed = 200) ->
-		angle = Phaser.Math.Angle.Between(@x, @y, dest.x, dest.y﻿)﻿
+		# Init setup.
+		proj =  {x: dest.x, y: dest.y}
+		# Bounds wrap.
+		for [coord, bound] in [['x', 'width'], ['y', 'height']]
+			console.log coord, bound
+			if Math.abs(dist = proj[coord]-@[coord]) > @scene.physics.world.bounds[bound] / 2
+				console.log proj[coord] -= @scene.physics.world.bounds[bound] * Math.sign dist
+		# Actual course correction.
+		angle = Phaser.Math.Angle.Between(@x, @y, proj.x, proj.y﻿)﻿
 		delta = @model.rotation - angle - 3.14 * (if angle > 3.14 / 2 then -1.5 else 0.5)
 		if Math.abs(delta) > 3.14 then delta = -delta
 		@model.body.setAngularVelocity -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
@@ -83,14 +91,15 @@ class Player extends Body
 		@target.visible = false
 		hud_font = {fontFamily: 'Saira Stencil One', fontSize: 25}
 		@hud = @scene.add.container 0, 0, (for color in ['gray', '#C46210']
-			lbl = @scene.add.text(15, 15, '', hud_font).setColor(color))
+			lbl = @scene.add.text(15, 15, '', hud_font).setColor color)
 		.setScrollFactor(0).setDepth(2)
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
-			.setShadow(0, 0, "crimson", 7, true, true))
+			.setShadow 0, 0, "crimson", 7, true, true)
 		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
+		# HUD tweens.
 		@scene.tweens.add
 			targets: @hud.list[4], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 		# Finzalization.
