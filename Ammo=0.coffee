@@ -75,7 +75,7 @@ class Player extends Body
 	constructor: (game, cfg, x = 0, y = 0) ->
 		# Body setup.
 		super 'pship', game, x, y, 'jet'
-		@scene.spacecrafts.add @model
+		@game.spacecrafts.add @model
 		@model.setScale 0.15, 0.15
 		@model.body.setMaxVelocity(100).setOffset(-65, -45).setSize(130, 130).setDrag(0.95).useDamping = true
 		# Custom jet trail.
@@ -100,10 +100,9 @@ class Player extends Body
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (pause).
-		pause_func = game.pause
-		@hud.add @switch = Game.text_button @scene, cfg.width - 80, 14, () ->
-			if @state isnt 0 then pause_func
-			@setText "\n"+["", "❚❚"][@state = 1 - @state]
+		@hud.add @switch = Game.text_button @scene, cfg.width - 80, 14, () =>
+			if @switch.state isnt 0 then @game.pause()
+			@switch.setText "\n"+["", "❚❚"][@switch.state = 1 - @switch.state]
 		@switch.setColor('gray').state = 0
 		@switch.emit('pointerdown')
 		# Hud setup (ammo counter, threat gauge)
@@ -114,7 +113,7 @@ class Player extends Body
 		@beat_sfx = @scene.sound.add 'heartbeat'
 		@hud.beat = @scene.tweens.add
 			targets: @hud.list[5], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
-			onRepeat: (-> @play()).bind @beat_sfx
+			onRepeat: => @beat_sfx.play()
 		# Finlization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@departure = new Date()
@@ -135,7 +134,7 @@ class Player extends Body
 		@scene.tweens.add
 			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
 		@scene.tweens.add
-			targets: @hud, alpha: 0, duration: 333, ease: 'Power1', onComplete: (-> @destroy();@beat.remove()).bind @hud
+			targets: @hud, alpha: 0, duration: 333, ease: 'Power1', onComplete: => @hud.destroy(); @hud.beat.remove()
 		# Record data.
 		@scene.postmortem.record = {time: new Date() - @departure, trashed: @trashed}
 		# Other stuff.
@@ -210,7 +209,7 @@ class Missile extends Body
 			@propel(200)
 			@fused = true if not @fused and not @scene.physics.world.overlap(@model, @emitter.model)
 		else if @fuel < -30 then @explode()
-		if @alive and @fused then @scene.physics.world.overlap @model, @scene.spacecrafts, (rkt, tgt) ->
+		if @alive and @fused then @scene.physics.world.overlap @model, @game.spacecrafts, (rkt, tgt) ->
 			rkt.self.explode()
 			tgt.self.explode()
 		@alive
@@ -225,7 +224,7 @@ class MissileBase extends Body
 		@model.setScale(0.0, 0.2).alpha = 0
 		@model.body.setOffset(-200, -200).setSize(400, 400)
 		# Additional setup.
-		@scene.spacecrafts.add(@model)
+		@game.spacecrafts.add(@model)
 		@scene.enemies++
 		@reload	= 0
 		# Missile silo
@@ -298,7 +297,7 @@ class Game
 		# Init setup.
 		cfg		= @app.config
 		@space	= @scene.add.tileSprite cfg.width / 2, cfg.height / 2, cfg.width*2, cfg.height*2, 'space'
-		@scene.spacecrafts = @scene.physics.add.group()
+		@spacecrafts = @scene.physics.add.group()
 		@space.setScrollFactor(0)
 		# Particle setup.
 		@scene[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
@@ -330,7 +329,7 @@ class Game
 		@welcome.heart = @scene.sound.add('heartbeat', {volume: 0.8})
 		@welcome.beat = @scene.tweens.add
 			targets: @welcome.first, scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
-			onRepeat: (-> @play()).bind @welcome.heart
+			onRepeat: => @welcome.heart.play()
 		# Welcome GUI: desc.
 		for hint, idx in ["「v0.03: Proto」", "「by Victoria A. Guevara」"]
 			@welcome.add label = @scene.add.text((cfg.width/2)*[-1,1][idx], (cfg.height/2-20)*[-1,1][idx],
@@ -351,8 +350,8 @@ class Game
 			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)				
 			@scene.tweens.add
 				targets: lbl, x: [-300, 300][idx], yoyo: true, repeat: -1, duration: 5000, ease: 'Sine.easeInOut'
-		@space.setInteractive().once 'pointerdown', (() ->
-			@scene.cameras.main.fadeOut(1000); @player = {alive: false}).bind @
+		@space.setInteractive().once 'pointerdown', () =>
+			@scene.cameras.main.fadeOut(1000); @player = {alive: false}
 		# Game mode setup.
 		@mode = 'survival'; @zone = 'medium'
 
@@ -420,7 +419,6 @@ class Game
 		table.push record
 		table.sort (a, b) -> if a.time < b.time then -1 else 1
 		localStorage[key] = JSON.stringify table[0..9]
-		console.log localStorage[key]
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
