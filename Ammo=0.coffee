@@ -24,9 +24,10 @@ class Body
 		# Init setup.
 		proj =  {x: dest.x, y: dest.y}
 		# Bounds wrap.
-		if Math.abs(vdist=proj.x-@x) > @scene.physics.world.bounds.width/2
+		distfactor = 0.8
+		if Math.abs(vdist=proj.x-@x) > @scene.physics.world.bounds.width * distfactor
 			proj.x -= @scene.physics.world.bounds.width * Math.sign vdist
-		if Math.abs(hdist=proj.y-@y) > @scene.physics.world.bounds.height/2
+		if Math.abs(hdist=proj.y-@y) > @scene.physics.world.bounds.height * distfactor
 			proj.y -= @scene.physics.world.bounds.height* Math.sign hdist
 		# Actual course correction.
 		angle = Phaser.Math.Angle.Between(@x, @y, proj.x, proj.y﻿)﻿
@@ -87,23 +88,24 @@ class Player extends Body
 		@scene.tweens.add
 			targets: @target.first, scaleX: 0.17, scaleY: 0.17, ease: 'Power1'
 			duration: 300, repeat: -1, yoyo: true, repeatDelay: 500
-		# HUD setup.
-		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@target.visible = false
+		# HUD setup.
 		hud_font = {fontFamily: 'Saira Stencil One', fontSize: 25}
 		@hud = @scene.add.container 0, 0, (for color in ['gray', '#C46210']
 			lbl = @scene.add.text(15, 15, '', hud_font).setColor color)
 		.setScrollFactor(0).setDepth(2)
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
+		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)		
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
 			.setShadow 0, 0, "crimson", 7, true, true)
 		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
 		# HUD tweens.
 		@scene.tweens.add
-			targets: @hud.list[4], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
+			targets: @hud.list[5], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 		# Finzalization.
+		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@departure = new Date()
 
 	explode: () ->
@@ -165,8 +167,10 @@ class Player extends Body
 			@hud.list[3].setText("Threat: #{'🞖'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
 		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
+		# HUD update: pausing button.
+		@hud.list[4]#.setText "Paused"
 		# HUD update: ammo counter.
-		@hud.list[4].setText "Ammo:#{@ammo}"
+		@hud.list[5].setText "Ammo:#{@ammo}"
 		# Finalization.
 		@target.visible = true
 		@alive
