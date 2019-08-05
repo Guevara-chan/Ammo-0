@@ -89,22 +89,32 @@ class Player extends Body
 			targets: @target.first, scaleX: 0.17, scaleY: 0.17, ease: 'Power1'
 			duration: 300, repeat: -1, yoyo: true, repeatDelay: 500
 		@target.visible = false
-		# HUD setup.
+		# HUD setup (main & trash counters).
 		hud_font = {fontFamily: 'Saira Stencil One', fontSize: 25}
 		@hud = @scene.add.container 0, 0, (for color in ['gray', '#C46210']
 			lbl = @scene.add.text(15, 15, '', hud_font).setColor color)
 		.setScrollFactor(0).setDepth(2)
+		# HUD setup (timer, threat, shadows).
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
-		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)		
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
+		# HUD setup (pauser, ammo counter, threat gauge).
+		@hud.add Game.text_button @scene, cfg.width - 80, 14, () ->
+			if @state isnt 0
+				@scene.player?.lapse = new Date()
+				@scene.game.canvas.style.opacity = 0.5
+				document.getElementById('util_ui').style.zIndex = 1
+				@scene.scene.pause()
+			@setText "\n"+["", "⏸️"][@state = 1 - @state]
+		@hud.list[4].state = 0
+		@hud.list[4].emit('pointerdown')
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
 			.setShadow 0, 0, "crimson", 7, true, true)
 		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
-		# HUD tweens.
+		# HUD setup (tweens).
 		@scene.tweens.add
 			targets: @hud.list[5], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
-		# Finzalization.
+		# Finlization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@departure = new Date()
 
@@ -167,8 +177,6 @@ class Player extends Body
 			@hud.list[3].setText("Threat: #{'🞖'.repeat(@scene.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
 		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
-		# HUD update: pausing button.
-		@hud.list[4]#.setText "Paused"
 		# HUD update: ammo counter.
 		@hud.list[5].setText "Ammo:#{@ammo}"
 		# Finalization.
@@ -302,9 +310,14 @@ class Game
 		for vol, idx in [0.15, 0.4]
 			@track_list.push @scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 5000}).on 'complete', random
 		random()
-		# Additional preparations.
+		# Additional main UI preparations.
 		@scene.input.setPollAlways true
-		document.getElementById('ui').style.visibility = 'visible'
+		document.getElementById('main_ui').style.visibility = 'visible'
+		# Utilitary UI preparations.
+		@util_ui				= document.getElementById('util_ui')
+		@util_ui.innerHTML		= "⋮▶Resume⋮"
+		@util_ui.onpointerdown	= @unpause.bind @
+		@util_ui.classList.add	'util_ui'
 		# Welcome GUI: logo.
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
@@ -376,6 +389,12 @@ class Game
 		y = @scene.player.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
 		@scene.objects.push @enemy = new MissileBase @scene, x, y
 		@scene.spawnlag += Math.max 0, 500 - @scene.player.trashed * 25
+
+	unpause: () ->
+		@util_ui.style.zIndex = -1
+		@scene.scene.resume()
+		@scene.game.canvas.style.opacity = 1
+		@player?.hud.list[4].emit('pointerdown')
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
