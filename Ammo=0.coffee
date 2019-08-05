@@ -423,7 +423,6 @@ class Game
 		@scene.scene.resume()
 
 	note_record: (record) ->
-		console.log "!"
 		@best = @records
 		@best.push record
 		@best.sort (a, b) -> if a.time > b.time then -1 else 1
@@ -458,7 +457,7 @@ class Game
 
 	# --Properties goes here.
 	@getter 'records_key',	() -> "#{@mode}:#{@zone}:best"
-	@getter 'records',		() -> console.log localStorage[@records_key]; JSON.parse(localStorage[@records_key]) ? []
+	@getter 'records',		() -> JSON.parse(localStorage[@records_key] ? "[]")
 #.}
 
 # ==Main code==
