@@ -357,8 +357,10 @@ class Game
 				targets: lbl, x: [-300, 300][idx], yoyo: true, repeat: -1, duration: 5000, ease: 'Sine.easeInOut'
 		@space.setInteractive().once 'pointerdown', (() ->
 			@scene.cameras.main.fadeOut(1000); @scene.player = {alive: false}).bind @
+		# Game mode setup.
+		@mode = 'survival'; @zone = 'medium'
 
-	init: (@mode = 'survival', @zone = 'medium') ->
+	init: (@mode, @zone) ->
 		# Init setup.
 		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
 		snd.destroy() for snd in @scene.sound.sounds when snd not in @scene.track_list
@@ -407,21 +409,34 @@ class Game
 		@scene.player?.departure = @scene.player.departure - 0 + (new Date() - @scene.player.paused)
 		@scene.player?.switch.emit('pointerdown')
 		@scene.track_list.now_playing.resume()
-		@scene.scene.resume()		
+		@scene.scene.resume()
+
+	note_record: (record) ->
+		key		= "#{@mode}:#{@zone}:best"
+		table	= JSON.parse(localStorage[key]) ? []
+		table.push record
+		table.sort (a, b) -> if a.time < b.time then -1 else 1
+		localStorage[key] = JSON.stringify table[0..9]
+		console.log localStorage[key]
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
 		if @scene.cameras.main.fadeEffect.isRunning then return
 		else return @space.rotation -= 0.001 unless @scene.player?
-		@scene.postmortem?.destroy()
-		if @scene.player.alive
+		if @scene.player.alive # Updating objects.
 			@scene.pending = []
 			switch @mode
 				when 'survival' # Infinite missile bases spawn.
 					if @scene.enemies < 5 and (@scene.spawnlag=Math.max 0, @scene.spawnlag-1) is 0 then @spawn()
 			@scene.objects = @scene.objects.filter (obj) -> obj.alive and obj.update()
 			@scene.objects = @scene.objects.concat @scene.pending
-		else @init()
+		else # (Re)starting
+			if @scene.postmortem 
+				@note_record @scene.postmortem.record
+				@scene.postmortem?.destroy()
+			switch @mode
+				when 'survival' # Infinite respawining.
+					@init(@mode, @zone)
 
 	@text_button: (scene, x, y, click_handler, txt='') ->
 		btn=scene.add.text(x, y, txt,{fontSize: 35}).setScrollFactor(0).setInteractive().setDepth(2).setOrigin(0.5, 0.5)
@@ -429,7 +444,6 @@ class Game
 		.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind btn)
 		.on('pointerdown',	click_handler)
 		return btn
-
 #.}
 
 # ==Main code==
