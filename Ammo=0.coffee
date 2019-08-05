@@ -27,7 +27,7 @@ class Body
 		@model.body.setAngularVelocity -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
 
 	propel: (impulse) ->
-		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse, @model.body.acceleration)
+		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse, @acceleration)
 		@trail?.start()
 
 	shoot: (ammo, target) ->
@@ -48,12 +48,13 @@ class Body
 	update: () ->
 		@scene.physics.world.wrap @model, 0
 		@trail?.stop()
-		@trail?.followOffset.x = -@model.body.acceleration.x / 10
-		@trail?.followOffset.y = -@model.body.acceleration.y / 10
+		@trail?.followOffset.x = -@acceleration.x / 10
+		@trail?.followOffset.y = -@acceleration.y / 10
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
 	@getter 'y',			() -> @model.y
+	@getter 'acceleration', () -> @model.body.acceleration
 	@getter 'remoteness',	() -> Phaser.Math.Distance.Between(@scene.player.x, @scene.player.y, @x, @y)
 # -------------------- #
 class Player extends Body
