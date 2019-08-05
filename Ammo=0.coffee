@@ -9,8 +9,9 @@ class Body
 	ammo:	0
 
 	# --Methods goes here.
-	constructor: (@sprite_id, @scene, x, y, trail_id) ->
+	constructor: (@sprite_id, @game, x, y, trail_id) ->
 		# Init setup.
+		@scene		= @game.scene
 		@model		= @scene.physics.add.existing @scene.add.container x, y, [@scene.add.image(0, 0, @sprite_id)]
 		@requiem	= @scene.sound.add("explode:#{@sprite_id}").on 'complete', (snd) -> snd.destroy()
 		@model.self	= @
@@ -41,7 +42,7 @@ class Body
 		@trail?.start()
 
 	shoot: (ammo, target) ->
-		if --@ammo > 0 then @scene.pending.push new ammo @scene, @, target
+		if --@ammo > 0 then @scene.pending.push new ammo @game, @, target
 
 	volume: (heardist = 1000) ->
 		volume: Math.max 0,	(heardist - @remoteness) / heardist
@@ -65,15 +66,15 @@ class Body
 	@getter 'x',			() -> @model.x
 	@getter 'y',			() -> @model.y
 	@getter 'acceleration', () -> @model.body.acceleration
-	@getter 'remoteness',	() -> Phaser.Math.Distance.Between(@scene.player.x, @scene.player.y, @x, @y)
+	@getter 'remoteness',	() -> Phaser.Math.Distance.Between(@game.player.x, @game.player.y, @x, @y)
 # -------------------- #
 class Player extends Body
 	trashed: 0
 
 	# --Methods goes here.
-	constructor: (scene, cfg, x = 0, y = 0) ->
+	constructor: (game, cfg, x = 0, y = 0) ->
 		# Body setup.
-		super 'pship', scene, x, y, 'jet'
+		super 'pship', game, x, y, 'jet'
 		@scene.spacecrafts.add @model
 		@model.setScale 0.15, 0.15
 		@model.body.setMaxVelocity(100).setOffset(-65, -45).setSize(130, 130).setDrag(0.95).useDamping = true
@@ -99,14 +100,9 @@ class Player extends Body
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (pause).
+		pause_func = game.pause
 		@hud.add @switch = Game.text_button @scene, cfg.width - 80, 14, () ->
-			if @state isnt 0
-				@scene.player?.paused = new Date()
-				@scene.game.canvas.style.opacity = 0.5
-				console.log @scene.track_list
-				@scene.track_list.now_playing.pause()
-				document.getElementById('util_ui').style.zIndex = 1
-				@scene.scene.pause()
+			if @state isnt 0 then pause_func
 			@setText "\n"+["", "❚❚"][@state = 1 - @state]
 		@switch.setColor('gray').state = 0
 		@switch.emit('pointerdown')
@@ -150,7 +146,7 @@ class Player extends Body
 	notedeath: () ->
 		return unless @alive
 		@trashed++
-		@scene.spawnlag += Math.max 0, 300 - @scene.player.trashed * 15
+		@scene.spawnlag += Math.max 0, 300 - @trashed * 15
 		@trash_anim = @scene.tweens.add
 			targets: @hud.list[1], scaleY: 0.0, yoyo: true, duration: 300, ease: 'Power1'
 
@@ -195,8 +191,8 @@ class Missile extends Body
 	fused:	false
 
 	# --Methods goes here.
-	constructor: (scene, emitter, @target) ->
-		super 'rocket', scene, emitter.x, emitter.y, 'jet'
+	constructor: (game, emitter, @target) ->
+		super 'rocket', game, emitter.x, emitter.y, 'jet'
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
 		@model.body.setMaxVelocity(110).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
 		@emitter = emitter
@@ -223,9 +219,9 @@ class MissileBase extends Body
 	ammo: Infinity
 
 	# --Methods goes here.
-	constructor: (scene, x, y) ->
+	constructor: (game, x, y) ->
 		# Model setup
-		super 'mbase', scene, x, y
+		super 'mbase', game, x, y
 		@model.setScale(0.0, 0.2).alpha = 0
 		@model.body.setOffset(-200, -200).setSize(400, 400)
 		# Additional setup.
@@ -250,17 +246,17 @@ class MissileBase extends Body
 	explode: () ->
 		super 75
 		@scene.enemies--
-		@scene.player.notedeath()
+		@game.player.notedeath()
 
 	update: () ->
 		super()
 		return true unless @teleport.progress is 1
 		@model.body.setAngularVelocity(100)
-		if @reload++ is 100 and @shoot(Missile, @scene.player)
+		if @reload++ is 100 and @shoot(Missile, @game.player)
 			@silo.explode(80, @x, @y)
 			@scene.sound.add("steam").on('completed', (snd) -> snd.destroy()).play(@volume())
 			@reload = 0
-		@scene.physics.world.overlap @model, @scene.player.model, (bse, plr) ->
+		@scene.physics.world.overlap @model, @game.player.model, (bse, plr) ->
 			bse.self.explode()
 			plr.self.explode()
 		@alive
@@ -356,7 +352,7 @@ class Game
 			@scene.tweens.add
 				targets: lbl, x: [-300, 300][idx], yoyo: true, repeat: -1, duration: 5000, ease: 'Sine.easeInOut'
 		@space.setInteractive().once 'pointerdown', (() ->
-			@scene.cameras.main.fadeOut(1000); @scene.player = {alive: false}).bind @
+			@scene.cameras.main.fadeOut(1000); @player = {alive: false}).bind @
 		# Game mode setup.
 		@mode = 'survival'; @zone = 'medium'
 
@@ -366,7 +362,7 @@ class Game
 		snd.destroy() for snd in @scene.sound.sounds when snd not in @scene.track_list
 		@scene.objects	= []
 		@scene.enemies	= 0
-		@scene.objects.push @scene.player = new Player @scene, @app.config
+		@scene.objects.push @player = new Player @, @app.config
 		# World setup.
 		[width, height] = [2500, 2500]
 		[x, y]			= [-width / 2, -height / 2]
@@ -375,7 +371,7 @@ class Game
 		# Object placement.
 		switch @mode
 			when 'survival' # Legacy near enemy.
-				@spawn @scene.player.x + 200 * [1,-1][@rnd 0, 1], @scene.player.y + 200 * [1,-1][@rnd 0, 1]
+				@spawn @player.x + 200 * [1,-1][@rnd 0, 1], @player.y + 200 * [1,-1][@rnd 0, 1]
 		# Briefing.
 		lines = [
 			"That guiding systems looks pretty cheap", "One day space will become endless again"
@@ -384,11 +380,11 @@ class Game
 			"Just another bad dream", "Thou shalt not kill"
 		]
 		@briefing?.destroy()
-		@briefing = @scene.add.text @scene.player.x, @scene.player.y - 40, "...#{lines[@rnd 0, lines.length-1]}...", 
+		@briefing = @scene.add.text @player.x, @player.y - 40, "...#{lines[@rnd 0, lines.length-1]}...", 
 				{fontFamily: 'Saira Stencil One', fontSize: 20, color: 'Cyan'}
 		@briefing.setOrigin(0.5, 0.5).setShadow(0, 0, "lightcoral", 7, true, true)
 		@scene.tweens.add cfg =
-			targets: @briefing, alpha: 0, duration: 1300, scaleX: 0.6, y: @scene.player.model.y, ease: 'Sine.easeInOut'
+			targets: @briefing, alpha: 0, duration: 1300, scaleX: 0.6, y: @player.model.y, ease: 'Sine.easeInOut'
 		# Finalization.
 		@welcome?.destroy()
 		@welcome?.beat.remove()
@@ -398,16 +394,23 @@ class Game
 
 	spawn: (x, y) ->
 		{width, height} = @scene.physics.world.bounds		
-		x = @scene.player.x + @rnd(@app.config.width / 2, width - @app.config.width)	unless x?
-		y = @scene.player.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
-		@scene.objects.push @enemy = new MissileBase @scene, x, y
-		@scene.spawnlag += Math.max 0, 500 - @scene.player.trashed * 25
+		x = @player.x + @rnd(@app.config.width / 2, width - @app.config.width)	unless x?
+		y = @player.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
+		@scene.objects.push @enemy = new MissileBase @, x, y
+		@scene.spawnlag += Math.max 0, 500 - @player.trashed * 25
+
+	pause: () ->
+		@player?.paused = new Date()
+		@scene.game.canvas.style.opacity = 0.5
+		@scene.track_list.now_playing.pause()
+		document.getElementById('util_ui').style.zIndex = 1
+		@scene.scene.pause()
 
 	unpause: () ->
 		@util_ui.style.zIndex = -1
 		@scene.game.canvas.style.opacity = 1
-		@scene.player?.departure = @scene.player.departure - 0 + (new Date() - @scene.player.paused)
-		@scene.player?.switch.emit('pointerdown')
+		@player?.departure = @player.departure - 0 + (new Date() - @player.paused)
+		@player?.switch.emit('pointerdown')
 		@scene.track_list.now_playing.resume()
 		@scene.scene.resume()
 
@@ -422,8 +425,8 @@ class Game
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
 		if @scene.cameras.main.fadeEffect.isRunning then return
-		else return @space.rotation -= 0.001 unless @scene.player?
-		if @scene.player.alive # Updating objects.
+		else return @space.rotation -= 0.001 unless @player?
+		if @player.alive # Updating objects.
 			@scene.pending = []
 			switch @mode
 				when 'survival' # Infinite missile bases spawn.
