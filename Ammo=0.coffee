@@ -331,7 +331,7 @@ class Game
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
 				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
 			]
-		@welcome.heart = @scene.sound.add('heartbeat')
+		@welcome.heart = @scene.sound.add('heartbeat', {volume: 0.8})
 		@welcome.beat = @scene.tweens.add
 			targets: @welcome.first, scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 			onRepeat: (-> @play()).bind @welcome.heart
