@@ -10,8 +10,8 @@ Initially made in ~3 days using [Phaser3](https://phaser.io/phaser3), project is
 
 # ⋮Compatibility⋮
 __Ammo:0__ was best tested with _Chrome 76_ and [Electron](https://electronjs.org/), which is used to develop it.  
-Reported as being compeletely playable with _Mozilla Firefox_, and (little worse) on _Edge_ and mobile _Chrome_.
-No __iOs__ support was achieved so far.
+Reported as being compeletely playable with _Mozilla Firefox_, and (little worse) on _Edge_ and mobile _Chrome_.  
+_No __iOs__ support was achieved so far._
 
 # ⋮Brief spampling of weaponless warfare⋮
 ![image](https://user-images.githubusercontent.com/8768470/62489082-88561680-b7ce-11e9-9ad8-43d5e6555735.png)
