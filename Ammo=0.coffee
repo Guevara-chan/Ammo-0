@@ -35,6 +35,7 @@ class Body
 		@model.body.setAngularVelocity -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
 
 	propel: (impulse) ->
+		@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
 		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse, @acceleration)
 		@trail?.start()
 
@@ -190,7 +191,6 @@ class Missile extends Body
 	update: () ->
 		super()
 		if @fuel-- > 0
-			@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
 			@orient @target.model
 			@propel(200)
 			@fused = true if not @fused and not @scene.physics.world.overlap(@model, @emitter.model)
