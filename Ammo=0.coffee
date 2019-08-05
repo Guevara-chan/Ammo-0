@@ -42,7 +42,7 @@ class Body
 		@trail?.start()
 
 	shoot: (ammo, target) ->
-		if --@ammo > 0 then @scene.pending.push new ammo @game, @, target
+		if --@ammo > 0 then @game.pending.push new ammo @game, @, target
 
 	volume: (heardist = 1000) ->
 		volume: Math.max 0,	(heardist - @remoteness) / heardist
@@ -145,7 +145,7 @@ class Player extends Body
 	notedeath: () ->
 		return unless @alive
 		@trashed++
-		@scene.spawnlag += Math.max 0, 300 - @trashed * 15
+		@game.spawnlag += Math.max 0, 300 - @trashed * 15
 		@trash_anim = @scene.tweens.add
 			targets: @hud.list[1], scaleY: 0.0, yoyo: true, duration: 300, ease: 'Power1'
 
@@ -173,12 +173,12 @@ class Player extends Body
 			[secs // 60, secs % 60].map((f) -> "#{f}".padStart(2, '0')).join ':.'[msecs // 500 % 2]
 		@hud.list[2].setColor('#f8' + Math.max(0x30, 0xef - secs).toString(16).padStart(2, '0').repeat(2))
 		# HUD update: threat level.
-		if @scene.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
+		if @game.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
 		else 
-			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xFF,0xD7,0x00,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
-			@hud.list[3].setText("Threat: #{'🞖'.repeat(@scene.enemies)}").setColor '#'	+
+			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xFF,0xD7,0x00,0xDC,0x14,0x3C,5,Math.min(5, @game.enemies)
+			@hud.list[3].setText("Threat: #{'🞖'.repeat(@game.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16).padStart(2, '0') for comp of rgb).join ''
-		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
+		@hud.last.setSize(@game.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
 		# HUD update: ammo counter.
 		@hud.list[5].setText "Ammo:#{@ammo}"
 		# Finalization.
@@ -225,7 +225,7 @@ class MissileBase extends Body
 		@model.body.setOffset(-200, -200).setSize(400, 400)
 		# Additional setup.
 		@game.spacecrafts.add(@model)
-		@scene.enemies++
+		@game.enemies++
 		@reload	= 0
 		# Missile silo
 		@silo	= @scene.steam.createEmitter cfg =
@@ -244,7 +244,7 @@ class MissileBase extends Body
 
 	explode: () ->
 		super 75
-		@scene.enemies--
+		@game.enemies--
 		@game.player.notedeath()
 
 	update: () ->
@@ -308,10 +308,10 @@ class Game
 		@muter.state = 0
 		@muter.emit('pointerdown')
 		# Ambient music.
-		@scene.track_list = []
-		random = (-> (@now_playing = @[Phaser.Math.Between 0, @length-1]).play()).bind @scene.track_list
+		@track_list = []
+		random = (-> (@now_playing = @[Phaser.Math.Between 0, @length-1]).play()).bind @track_list
 		for vol, idx in [0.15, 0.4]
-			@scene.track_list.push @scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 5000}).on 'complete', random
+			@track_list.push @scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 5000}).on 'complete', random
 		random()
 		# Additional main UI preparations.
 		@scene.input.setPollAlways true
@@ -358,10 +358,10 @@ class Game
 	init: (@mode, @zone) ->
 		# Init setup.
 		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
-		snd.destroy() for snd in @scene.sound.sounds when snd not in @scene.track_list
-		@scene.objects	= []
-		@scene.enemies	= 0
-		@scene.objects.push @player = new Player @, @app.config
+		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
+		@objects	= []
+		@enemies	= 0
+		@objects.push @player = new Player @, @app.config
 		# World setup.
 		[width, height] = [2500, 2500]
 		[x, y]			= [-width / 2, -height / 2]
@@ -387,7 +387,7 @@ class Game
 		# Finalization.
 		@welcome?.destroy()
 		@welcome?.beat.remove()
-		@scene.spawnlag	= 0
+		@spawnlag		= 0
 		@space.rotation = 0
 		@scene.cameras.main.fadeIn(1000)
 
@@ -395,13 +395,13 @@ class Game
 		{width, height} = @scene.physics.world.bounds		
 		x = @player.x + @rnd(@app.config.width / 2, width - @app.config.width)	unless x?
 		y = @player.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
-		@scene.objects.push @enemy = new MissileBase @, x, y
-		@scene.spawnlag += Math.max 0, 500 - @player.trashed * 25
+		@objects.push @enemy = new MissileBase @, x, y
+		@spawnlag += Math.max 0, 500 - @player.trashed * 25
 
 	pause: () ->
 		@player?.paused = new Date()
 		@scene.game.canvas.style.opacity = 0.5
-		@scene.track_list.now_playing.pause()
+		@track_list.now_playing.pause()
 		document.getElementById('util_ui').style.zIndex = 1
 		@scene.scene.pause()
 
@@ -410,7 +410,7 @@ class Game
 		@scene.game.canvas.style.opacity = 1
 		@player?.departure = @player.departure - 0 + (new Date() - @player.paused)
 		@player?.switch.emit('pointerdown')
-		@scene.track_list.now_playing.resume()
+		@track_list.now_playing.resume()
 		@scene.scene.resume()
 
 	note_record: (record) ->
@@ -425,12 +425,12 @@ class Game
 		if @scene.cameras.main.fadeEffect.isRunning then return
 		else return @space.rotation -= 0.001 unless @player?
 		if @player.alive # Updating objects.
-			@scene.pending = []
+			@pending = []
 			switch @mode
 				when 'survival' # Infinite missile bases spawn.
-					if @scene.enemies < 5 and (@scene.spawnlag=Math.max 0, @scene.spawnlag-1) is 0 then @spawn()
-			@scene.objects = @scene.objects.filter (obj) -> obj.alive and obj.update()
-			@scene.objects = @scene.objects.concat @scene.pending
+					if @enemies < 5 and (@spawnlag = Math.max 0, @spawnlag - 1) is 0 then @spawn()
+			@objects = @objects.filter (obj) -> obj.alive and obj.update()
+			@objects = @objects.concat @pending
 		else # (Re)starting
 			if @scene.postmortem 
 				@note_record @scene.postmortem.record
