@@ -422,7 +422,6 @@ class Game
 		@track_list.now_playing.resume()
 		@scene.scene.resume()
 
-
 	note_record: (record) ->
 		@best = @records
 		@best.push record
@@ -458,7 +457,7 @@ class Game
 
 	# --Properties goes here.
 	@getter 'records_key',	() -> "#{@mode}:#{@zone}:best"
-	@getter 'records',		() -> JSON.parse(localStorage[@records_key]) ? []
+	@getter 'records',		() -> console.log localStorage[@records_key]; JSON.parse(localStorage[@records_key]) ? []
 #.}
 
 # ==Main code==
