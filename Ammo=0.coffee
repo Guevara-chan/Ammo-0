@@ -423,6 +423,7 @@ class Game
 		@scene.scene.resume()
 
 	note_record: (record) ->
+		console.log "!"
 		@best = @records
 		@best.push record
 		@best.sort (a, b) -> if a.time > b.time then -1 else 1
