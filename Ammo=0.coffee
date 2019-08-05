@@ -1,3 +1,9 @@
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Ammo:0 antishooter game v0.03
+# Developed in 2019 by V.A. Guevara
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+#.{ [Classes]
 class Body
 	alive:	true
 	ammo:	0
@@ -15,7 +21,7 @@ class Body
 			.startFollow @model, true, 0.05, 0.05
 
 	orient: (dest, speed = 200) ->
-		angle = Phaser.Math.Angle.Between(@model.x, @model.y, dest.x, dest.y﻿)﻿
+		angle = Phaser.Math.Angle.Between(@x, @y, dest.x, dest.y﻿)﻿
 		delta = @model.rotation - angle - 3.14 * (if angle > 3.14 / 2 then -1.5 else 0.5)
 		if Math.abs(delta) > 3.14 then delta = -delta
 		@model.body.setAngularVelocity -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
@@ -27,14 +33,13 @@ class Body
 	shoot: (ammo, target) ->
 		if --@ammo > 0 then @scene.pending.push new ammo @scene, @, target
 
-	volume: (hear = 1000) ->
-		volume: Math.max 0,
-			(hear - Phaser.Math.Distance.Between(@scene.player.model.x, @scene.player.model.y, @model.x, @model.y))/hear
+	volume: (heardist = 1000) ->
+		volume: Math.max 0,	(heardist - @remoteness) / heardist
 
 	explode: (magnitude = 50) ->
 		@explosion  = @scene.explode.createEmitter
 			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }, scale: { start: 0.1, end: 0 }, blendMode: 'ADD'
-		.explode(magnitude * 2, @model.x, @model.y)
+		.explode(magnitude * 2, @x, @y)
 		@model.destroy()
 		@trail?.stopFollow().stop()
 		@requiem?.play @volume()
@@ -45,6 +50,11 @@ class Body
 		@trail?.stop()
 		@trail?.followOffset.x = -@model.body.acceleration.x / 10
 		@trail?.followOffset.y = -@model.body.acceleration.y / 10
+
+	# --Properties goes here.
+	@getter 'x',			() -> @model.x
+	@getter 'y',			() -> @model.y
+	@getter 'remoteness',	() -> Phaser.Math.Distance.Between(@scene.player.x, @scene.player.y, @x, @y)
 # -------------------- #
 class Player extends Body
 	trashed: 0
@@ -155,7 +165,7 @@ class Missile extends Body
 
 	# --Methods goes here.
 	constructor: (scene, emitter, @target) ->
-		super 'rocket', scene, emitter.model.x, emitter.model.y, 'jet'
+		super 'rocket', scene, emitter.x, emitter.y, 'jet'
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
 		@model.body.setMaxVelocity(110).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
 		@emitter = emitter
@@ -217,7 +227,7 @@ class MissileBase extends Body
 		return true unless @teleport.progress is 1
 		@model.body.setAngularVelocity(100)
 		if @reload++ is 100 and @shoot(Missile, @scene.player)
-			@silo.explode(80, @model.x, @model.y)
+			@silo.explode(80, @x, @y)
 			@scene.sound.add("steam").on('completed', (snd) -> snd.destroy()).play(@volume())
 			@reload = 0
 		@scene.physics.world.overlap @model, @scene.player.model, (bse, plr) ->
@@ -328,7 +338,7 @@ class Game
 		# Object placement.
 		switch @mode
 			when 'survival' # Legacy near enemy.
-				@spawn @scene.player.model.x + 200 * [1,-1][@rnd 0, 1], @scene.player.model.y + 200 * [1,-1][@rnd 0, 1]
+				@spawn @scene.player.x + 200 * [1,-1][@rnd 0, 1], @scene.player.y + 200 * [1,-1][@rnd 0, 1]
 		# Briefing.
 		lines = [
 			"That guiding systems looks pretty cheap", "One day space will become endless again"
@@ -337,8 +347,7 @@ class Game
 			"Just another bad dream", "Thou shalt not kill"
 		]
 		@briefing?.destroy()
-		@briefing = @scene.add.text @scene.player.model.x, @scene.player.model.y - 40,
-			"...#{lines[@rnd 0, lines.length-1]}...", 
+		@briefing = @scene.add.text @scene.player.x, @scene.player.y - 40, "...#{lines[@rnd 0, lines.length-1]}...", 
 				{fontFamily: 'Saira Stencil One', fontSize: 20, color: 'Cyan'}
 		@briefing.setOrigin(0.5, 0.5).setShadow(0, 0, "lightcoral", 7, true, true)
 		@scene.tweens.add cfg =
@@ -351,8 +360,8 @@ class Game
 
 	spawn: (x, y) ->
 		{width, height} = @scene.physics.world.bounds		
-		x = @scene.player.model.x + @rnd(@app.config.width / 2, width - @app.config.width)	 unless x?
-		y = @scene.player.model.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
+		x = @scene.player.x + @rnd(@app.config.width / 2, width - @app.config.width)	unless x?
+		y = @scene.player.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
 		@scene.objects.push @enemy = new MissileBase @scene, x, y
 		@scene.spawnlag += Math.max 0, 500 - @scene.player.trashed * 25
 
@@ -369,6 +378,7 @@ class Game
 			@scene.objects = @scene.objects.filter (obj) -> obj.alive and obj.update()
 			@scene.objects = @scene.objects.concat @scene.pending
 		else @init()
-			
+#.}
+
 # ==Main code==
 new Game()
