@@ -24,10 +24,10 @@ class Body
 		# Init setup.
 		proj =  {x: dest.x, y: dest.y}
 		# Bounds wrap.
-		for [coord, bound] in [['x', 'width'], ['y', 'height']]
-			console.log coord, bound
-			if Math.abs(dist = proj[coord]-@[coord]) > @scene.physics.world.bounds[bound] / 2
-				console.log proj[coord] -= @scene.physics.world.bounds[bound] * Math.sign dist
+		if Math.abs(vdist=proj.x-@x) > @scene.physics.world.bounds.width/2
+			proj.x -= @scene.physics.world.bounds.width * Math.sign vdist
+		if Math.abs(hdist=proj.y-@y) > @scene.physics.world.bounds.height/2
+			proj.y -= @scene.physics.world.bounds.height* Math.sign hdist
 		# Actual course correction.
 		angle = Phaser.Math.Angle.Between(@x, @y, proj.x, proj.y﻿)﻿
 		delta = @model.rotation - angle - 3.14 * (if angle > 3.14 / 2 then -1.5 else 0.5)
