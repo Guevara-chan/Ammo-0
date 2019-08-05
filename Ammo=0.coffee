@@ -182,8 +182,9 @@ class Player extends Body
 				(Math.round(rgb[comp]).toString(16).padStart(2, '0') for comp of rgb).join ''
 		@hud.last.setSize(@game.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
 		# HUD update: best record.
-		{time, trashed} = @game.records[0]
-		if time? then @hud.list[4].setColor('goldenrod').setText "👑#{tformat(time//1000).join(':')} | ☠#{trashed}"
+		records = @game.records
+		{time, trashed} = if records.length then records[0] else {time: @flytime, trashed: @trashed}
+		@hud.list[4].setColor('goldenrod').setText "👑#{tformat(time//1000).join(':')} | ☠#{trashed}"
 		# HUD update: ammo counter.
 		@hud.list[6].setText "Ammo:#{@ammo}"
 		# Finalization.
