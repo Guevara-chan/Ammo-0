@@ -115,8 +115,10 @@ class Player extends Body
 			.setShadow 0, 0, "crimson", 7, true, true)
 		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
 		# HUD setup (tweens).
-		@scene.tweens.add
+		@beat_sfx = @scene.sound.add 'heartbeat'
+		@hud.beat = @scene.tweens.add
 			targets: @hud.list[5], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
+			onRepeat: (-> @play()).bind @beat_sfx
 		# Finlization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@departure = new Date()
@@ -137,7 +139,7 @@ class Player extends Body
 		@scene.tweens.add
 			targets: @scene.postmortem, alpha: 1, scaleY: 1, duration: 333, ease: 'Power1'
 		@scene.tweens.add
-			targets: @hud, alpha: 0, duration: 333, ease: 'Power1', onComplete: (-> @destroy()).bind @hud
+			targets: @hud, alpha: 0, duration: 333, ease: 'Power1', onComplete: (-> @destroy();@beat.remove()).bind @hud
 		# Other stuff.
 		@target.destroy()
 		@scene.cameras.main.fadeOut(1000)
@@ -290,7 +292,8 @@ class Game
 		@load.image 'steam',	'steam00.png'
 		@load.image 'dest',		'dest.png'
 		@load.image 'explode',	'explosion00.png'
-		@load.audio 'steam',	"steam.wav"
+		@load.audio 'steam',	'steam.wav'
+		@load.audio 'heartbeat','heartbeat.wav'
 		@load.audio "ambient:#{idx}", "Track#{idx}.ogg" for idx in [1..3]			
 
 	create: () ->
@@ -326,8 +329,10 @@ class Game
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
 				.setOrigin(0.5, 0.5).setShadow(0, 0, "crimson", 7, true, true)
 			]
-		@scene.tweens.add
+		@welcome.heart = @scene.sound.add('heartbeat')
+		@welcome.beat = @scene.tweens.add
 			targets: @welcome.first, scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
+			onRepeat: (-> @play()).bind @welcome.heart
 		# Welcome GUI: desc.
 		for hint, idx in ["「v0.03: Proto」", "「by Victoria A. Guevara」"]
 			@welcome.add label = @scene.add.text((cfg.width/2)*[-1,1][idx], (cfg.height/2-20)*[-1,1][idx],
@@ -382,6 +387,7 @@ class Game
 			targets: @briefing, alpha: 0, duration: 1300, scaleX: 0.6, y: @scene.player.model.y, ease: 'Sine.easeInOut'
 		# Finalization.
 		@welcome?.destroy()
+		@welcome?.beat.remove()
 		@scene.spawnlag	= 0
 		@space.rotation = 0
 		@scene.cameras.main.fadeIn(1000)
