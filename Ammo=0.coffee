@@ -184,7 +184,7 @@ class Player extends Body
 		# HUD update: best record.
 		best = @game.records
 		{time, trashed}=(if best.length and @flytime < best[0].time then best[0] else {time:@flytime,trashed:@trashed})
-		@hud.list[4].setColor('goldenrod').setText "👑#{tformat(time//1000).join(':')} | ☠#{trashed}"
+		@hud.list[4].setColor('goldenrod').setText "🏆#{tformat(time//1000).join(':')} | ☠#{trashed}"
 		# HUD update: ammo counter.
 		@hud.list[6].setText "Ammo:#{@ammo}"
 		# Finalization.
