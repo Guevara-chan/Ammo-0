@@ -304,7 +304,7 @@ class Game
 		@load.image 'explode',	'explosion00.png'
 		@load.audio 'steam',	'steam.wav'
 		@load.audio 'heartbeat','heartbeat.wav'
-		@load.audio "ambient:#{idx}", "Track#{idx}.ogg" for idx in [1..3]			
+		@load.audio "ambient:#{idx}", "Track#{idx}.ogg" for idx in [1..2]			
 
 	create: () ->
 		# Init setup.
