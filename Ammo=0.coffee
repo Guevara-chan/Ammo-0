@@ -292,13 +292,10 @@ class Game
 		@scene[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@scene.steam.setDepth(1)
 		# SFX switcher.
-		@muter = @scene.add.text @app.config.width - 35, 14, "", {fontSize: 35, color: 'Cyan'}
-		@muter.setScrollFactor(0).setInteractive().setDepth(2).setOrigin(0.5, 0.5).state = 0
-		@muter.on 'pointerdown', (() ->
-			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]).bind @muter
+		@muter = Game.text_button @scene, @app.config.width - 35, 14, () ->
+			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]
+		@muter.state = 0
 		@muter.emit('pointerdown')
-		@muter.on('pointerover',(-> @setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind @muter)
-		@muter.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind @muter)
 		# Ambient music.
 		@track_list	= []
 		random = (() -> @[Phaser.Math.Between 0, @length-1].play()).bind @track_list
@@ -393,6 +390,14 @@ class Game
 			@scene.objects = @scene.objects.filter (obj) -> obj.alive and obj.update()
 			@scene.objects = @scene.objects.concat @scene.pending
 		else @init()
+
+	@text_button: (scene, x, y, click_handler, txt='') ->
+		btn=scene.add.text(x, y, txt,{fontSize: 35}).setScrollFactor(0).setInteractive().setDepth(2).setOrigin(0.5, 0.5)
+		btn.on('pointerover',	(-> @setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind btn)
+		.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind btn)
+		.on('pointerdown',	click_handler)
+		return btn
+
 #.}
 
 # ==Main code==
