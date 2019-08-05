@@ -178,7 +178,7 @@ class Player extends Body
 		else 
 			rgb = Phaser.Display.Color.Interpolate.RGBWithRGB 0xFF,0xD7,0x00,0xDC,0x14,0x3C,5,Math.min(5,@scene.enemies)
 			@hud.list[3].setText("Threat: #{'🞖'.repeat(@scene.enemies)}").setColor '#'	+
-				(Math.round(rgb[comp]).toString(16) for comp of rgb).join ''
+				(Math.round(rgb[comp]).toString(16).padStart(2, '0') for comp of rgb).join ''
 		@hud.last.setSize(@scene.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
 		# HUD update: ammo counter.
 		@hud.list[5].setText "Ammo:#{@ammo}"
