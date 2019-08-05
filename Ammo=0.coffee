@@ -99,15 +99,17 @@ class Player extends Body
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (pause).
-		@hud.add Game.text_button @scene, cfg.width - 80, 14, () ->
+		@hud.add @switch = Game.text_button @scene, cfg.width - 80, 14, () ->
 			if @state isnt 0
 				@scene.player?.paused = new Date()
 				@scene.game.canvas.style.opacity = 0.5
+				console.log @scene.track_list
+				@scene.track_list.now_playing.pause()
 				document.getElementById('util_ui').style.zIndex = 1
 				@scene.scene.pause()
 			@setText "\n"+["", "❚❚"][@state = 1 - @state]
-		@hud.list[4].state = 0
-		@hud.list[4].emit('pointerdown')
+		@switch.setColor('dimgray').state = 0
+		@switch.emit('pointerdown')
 		# Hud setup (ammo counter, threat gauge)
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
 			.setShadow 0, 0, "crimson", 7, true, true)
@@ -306,10 +308,10 @@ class Game
 		@muter.state = 0
 		@muter.emit('pointerdown')
 		# Ambient music.
-		@track_list	= []
-		random = (() -> @[Phaser.Math.Between 0, @length-1].play()).bind @track_list
+		@scene.track_list = []
+		random = (-> (@now_playing = @[Phaser.Math.Between 0, @length-1]).play()).bind @scene.track_list
 		for vol, idx in [0.15, 0.4]
-			@track_list.push @scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 5000}).on 'complete', random
+			@scene.track_list.push @scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 5000}).on 'complete', random
 		random()
 		# Additional main UI preparations.
 		@scene.input.setPollAlways true
@@ -352,7 +354,7 @@ class Game
 	init: (@mode = 'survival', @zone = 'medium') ->
 		# Init setup.
 		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
-		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
+		snd.destroy() for snd in @scene.sound.sounds when snd not in @scene.track_list
 		@scene.objects	= []
 		@scene.enemies	= 0
 		@scene.objects.push @scene.player = new Player @scene, @app.config
@@ -395,7 +397,8 @@ class Game
 		@util_ui.style.zIndex = -1
 		@scene.game.canvas.style.opacity = 1
 		@scene.player?.departure = @scene.player.departure - 0 + (new Date() - @scene.player.paused)
-		@scene.player?.hud.list[4].emit('pointerdown')
+		@scene.player?.switch.emit('pointerdown')
+		@scene.track_list.now_playing.resume()
 		@scene.scene.resume()		
 
 	update: () ->
