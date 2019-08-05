@@ -17,7 +17,7 @@ class Body
 		@model.self	= @
 		# Trail setup.
 		if trail_id?
-			@trail = @scene[trail_id].createEmitter cfg =
+			@trail = @game[trail_id].createEmitter cfg =
 				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: () => @model.angle + 90
 			.startFollow @model, true, 0.05, 0.05
 
@@ -48,7 +48,7 @@ class Body
 		volume: Math.max 0,	(heardist - @remoteness) / heardist
 
 	explode: (magnitude = 50) ->
-		@explosion  = @scene.explode.createEmitter
+		@explosion  = @game.explode.createEmitter
 			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }, scale: { start: 0.1, end: 0 }, blendMode: 'ADD'
 		.explode(magnitude * 2, @x, @y)
 		@model.destroy()
@@ -95,9 +95,10 @@ class Player extends Body
 		@hud = @scene.add.container 0, 0, (for color in ['gray', '#C46210']
 			lbl = @scene.add.text(15, 15, '', hud_font).setColor color)
 		.setScrollFactor(0).setDepth(2)
-		# HUD setup (timer, threat, shadows).
+		# HUD setup (timer, threat, shadows, record).
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
+		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (pause).
 		@hud.add @switch = Game.text_button @scene, cfg.width - 80, 14, () =>
@@ -112,7 +113,7 @@ class Player extends Body
 		# HUD setup (tweens).
 		@beat_sfx = @scene.sound.add 'heartbeat'
 		@hud.beat = @scene.tweens.add
-			targets: @hud.list[5], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
+			targets: @hud.list[6], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 			onRepeat: => @beat_sfx.play()
 		# Finlization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
@@ -136,7 +137,7 @@ class Player extends Body
 		@scene.tweens.add
 			targets: @hud, alpha: 0, duration: 333, ease: 'Power1', onComplete: => @hud.destroy(); @hud.beat.remove()
 		# Record data.
-		@scene.postmortem.record = {time: new Date() - @departure, trashed: @trashed}
+		@scene.postmortem.record = {time: @flytime, trashed: @trashed}
 		# Other stuff.
 		@target.destroy()
 		@scene.cameras.main.fadeOut(1000)
@@ -151,6 +152,7 @@ class Player extends Body
 
 	update: () ->
 		super()
+		tformat = (secs) ->	[secs // 60, secs % 60].map (f) -> "#{f}".padStart(2, '0')
 		# Crosshair updating.
 		Object.assign @target, @scene.cameras.main.getWorldPoint @scene.input.activePointer.position.x,
 			@scene.input.activePointer.position.y
@@ -167,10 +169,10 @@ class Player extends Body
 		for lbl, idx in @hud.list[0..1]
 			if idx is 0 or not (0 < @trash_anim?.progress < 0.5) then lbl.setText "Trashed: #{@trashed}☠"
 		# HUD update: mission clock.
-		msecs	= new Date() - @departure 
+		msecs	= @flytime
 		secs	= msecs // 1000
 		@hud.list[2].setText ['🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛'][msecs // 100 % 12] +
-			[secs // 60, secs % 60].map((f) -> "#{f}".padStart(2, '0')).join ':.'[msecs // 500 % 2]
+			tformat(secs).join ':.'[msecs // 500 % 2]
 		@hud.list[2].setColor('#f8' + Math.max(0x30, 0xef - secs).toString(16).padStart(2, '0').repeat(2))
 		# HUD update: threat level.
 		if @game.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
@@ -179,11 +181,17 @@ class Player extends Body
 			@hud.list[3].setText("Threat: #{'🞖'.repeat(@game.enemies)}").setColor '#'	+
 				(Math.round(rgb[comp]).toString(16).padStart(2, '0') for comp of rgb).join ''
 		@hud.last.setSize(@game.spawnlag / 5, 3).fillColor = parseInt("0x"+@hud.list[3].style.color[1..])
+		# HUD update: best record.
+		{time, trashed} = @game.records[0]
+		if time? then @hud.list[4].setColor('goldenrod').setText "👑#{tformat(time//1000).join(':')} | ☠#{trashed}"
 		# HUD update: ammo counter.
-		@hud.list[5].setText "Ammo:#{@ammo}"
+		@hud.list[6].setText "Ammo:#{@ammo}"
 		# Finalization.
 		@target.visible = true
 		@alive
+
+	# --Properties goes here.
+	@getter 'flytime', () -> new Date() - @departure
 # -------------------- #
 class Missile extends Body
 	fuel:	1000
@@ -228,7 +236,7 @@ class MissileBase extends Body
 		@game.enemies++
 		@reload	= 0
 		# Missile silo
-		@silo	= @scene.steam.createEmitter cfg =
+		@silo	= @game.steam.createEmitter cfg =
 			speed: { min: 50,		max: 100 }
 			scale: { start: 0.1,	end: 0.05 }
 			alpha: { start: 1,		end: 0 }
@@ -276,6 +284,7 @@ class Game
 				default: 'arcade'
 				# arcade:
 				# 	debug: true
+			onPause: @pause.bind @
 		self = @
 
 	preload: () ->
@@ -300,8 +309,8 @@ class Game
 		@spacecrafts = @scene.physics.add.group()
 		@space.setScrollFactor(0)
 		# Particle setup.
-		@scene[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
-		@scene.steam.setDepth(1)
+		@[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
+		@steam.setDepth(1)
 		# SFX switcher.
 		@muter = Game.text_button @scene, @app.config.width - 35, 14, () ->
 			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]
@@ -413,12 +422,13 @@ class Game
 		@track_list.now_playing.resume()
 		@scene.scene.resume()
 
+
 	note_record: (record) ->
-		key		= "#{@mode}:#{@zone}:best"
-		table	= JSON.parse(localStorage[key]) ? []
-		table.push record
-		table.sort (a, b) -> if a.time < b.time then -1 else 1
-		localStorage[key] = JSON.stringify table[0..9]
+		@best = @records
+		@best.push record
+		@best.sort (a, b) -> if a.time > b.time then -1 else 1
+		localStorage[@records_key] = JSON.stringify @best[0..9]
+		console.log localStorage[@records_key]
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
@@ -445,6 +455,10 @@ class Game
 		.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind btn)
 		.on('pointerdown',	click_handler)
 		return btn
+
+	# --Properties goes here.
+	@getter 'records_key',	() -> "#{@mode}:#{@zone}:best"
+	@getter 'records',		() -> JSON.parse(localStorage[@records_key]) ? []
 #.}
 
 # ==Main code==
