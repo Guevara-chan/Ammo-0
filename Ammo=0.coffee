@@ -98,16 +98,17 @@ class Player extends Body
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
-		# HUD setup (pauser, ammo counter, threat gauge).
+		# HUD setup (pause).
 		@hud.add Game.text_button @scene, cfg.width - 80, 14, () ->
 			if @state isnt 0
-				@scene.player?.lapse = new Date()
+				@scene.player?.paused = new Date()
 				@scene.game.canvas.style.opacity = 0.5
 				document.getElementById('util_ui').style.zIndex = 1
 				@scene.scene.pause()
 			@setText "\n"+["", "⏸️"][@state = 1 - @state]
 		@hud.list[4].state = 0
 		@hud.list[4].emit('pointerdown')
+		# Hud setup (ammo counter, threat gauge)
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
 			.setShadow 0, 0, "crimson", 7, true, true)
 		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
@@ -392,9 +393,10 @@ class Game
 
 	unpause: () ->
 		@util_ui.style.zIndex = -1
-		@scene.scene.resume()
 		@scene.game.canvas.style.opacity = 1
-		@player?.hud.list[4].emit('pointerdown')
+		@scene.player?.departure = @scene.player.departure - 0 + (new Date() - @scene.player.paused)
+		@scene.player?.hud.list[4].emit('pointerdown')
+		@scene.scene.resume()		
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
