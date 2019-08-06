@@ -285,7 +285,7 @@ class Game
 		window.moveTo (screen.width-window.outerWidth) / 2, (screen.height-window.outerHeight) / 2
 		@app = new Phaser.Game
 			type: Phaser.WEBGL, width: width, height: height, parent: 'main_ui'
-			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
+			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_VERTICALLY }
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
