@@ -207,7 +207,8 @@ class Missile extends Body
 		super 'rocket', game, emitter.x, emitter.y, 'jet'
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
 		@model.body.setMaxVelocity(110 * @tempo).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
-		@emitter = emitter
+		@emitter	= emitter
+		@engine_off	+= 0.5
 
 	explode: () ->
 		super()
