@@ -7,6 +7,7 @@
 class Body
 	alive:	true
 	ammo:	0
+	tempo:	1.5
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @game, x, y, trail_id) ->
@@ -38,7 +39,7 @@ class Body
 
 	propel: (impulse) ->
 		@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
-		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse, @acceleration)
+		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse * @tempo, @acceleration)
 		@trail?.start()
 
 	shoot: (ammo, target) ->
@@ -59,8 +60,8 @@ class Body
 	update: () ->
 		@scene.physics.world.wrap @model, 0
 		@trail?.stop()
-		@trail?.followOffset.x = -@acceleration.x / 10
-		@trail?.followOffset.y = -@acceleration.y / 10
+		@trail?.followOffset.x = -@acceleration.x / (10 * @tempo)
+		@trail?.followOffset.y = -@acceleration.y / (10 * @tempo)
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
@@ -77,7 +78,7 @@ class Player extends Body
 		super 'pship', game, x, y, 'jet'
 		@game.spacecrafts.add @model
 		@model.setScale 0.15, 0.15
-		@model.body.setMaxVelocity(100).setOffset(-65, -45).setSize(130, 130).setDrag(0.95).useDamping = true
+		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130).setDrag(0.95).useDamping = true
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		# Crosshair
@@ -204,7 +205,7 @@ class Missile extends Body
 	constructor: (game, emitter, @target) ->
 		super 'rocket', game, emitter.x, emitter.y, 'jet'
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
-		@model.body.setMaxVelocity(110).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
+		@model.body.setMaxVelocity(110 * @tempo).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
 		@emitter = emitter
 
 	explode: () ->
