@@ -342,6 +342,7 @@ class Game
 		@util_ui.innerHTML		= "⋮▶Resume⋮"
 		@util_ui.onpointerdown	= @unpause.bind @
 		@util_ui.classList.add	'util_ui'
+		window.addEventListener 'resize', => @util_ui.style.fontSize = "#{@scene.game.canvas.clientWidth//15.75}px"
 		# Welcome GUI: logo.
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
