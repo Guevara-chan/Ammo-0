@@ -17,6 +17,7 @@ class Body
 		@model		= @scene.physics.add.existing @scene.add.container x, y, [@scene.add.image(0, 0, @sprite_id)]
 		@requiem	= @scene.sound.add("explode:#{@sprite_id}").on 'complete', (snd) -> snd.destroy()
 		@model.self	= @
+		@game.objects.push @
 		# Trail setup.
 		if trail_id?
 			@trail = @game[trail_id].createEmitter cfg =
@@ -385,7 +386,7 @@ class Game
 		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
 		@objects	= []
 		@enemies	= 0
-		@objects.push @player = new Player @, @app.config
+		@player		= new Player @, @app.config
 		# World setup.
 		[width, height] = [2500, 2500]
 		[x, y]			= [-width / 2, -height / 2]
@@ -394,7 +395,7 @@ class Game
 		# Object placement.
 		switch @mode
 			when 'survival' # Legacy near enemy.
-				@spawn @player.x + 200 * [1,-1][@rnd 0, 1], @player.y + 200 * [1,-1][@rnd 0, 1]
+				@spawn MissileBase, {x: @player.x + 200 * [1,-1][@rnd 0, 1], y: @player.y + 200 * [1,-1][@rnd 0, 1]}
 		# Briefing.
 		lines = [
 			"That guiding systems looks pretty cheap", "One day space will become endless again"
@@ -415,12 +416,14 @@ class Game
 		@space.rotation = 0
 		@scene.cameras.main.fadeIn(1000)
 
-	spawn: (x, y) ->
-		{width, height} = @scene.physics.world.bounds		
-		x = @player.x + @rnd(@app.config.width / 2, width - @app.config.width)		unless x?
-		y = @player.y + @rnd(@app.config.height / 2, height - @app.config.height)	unless y?
-		@objects.push @enemy = new MissileBase @, x, y
+	spawn: (kind = MissileBase, pos) ->
+		unless pos?
+			{x, y, width, height} = @scene.physics.world.bounds
+			pos =
+				x: @player.x + @rnd(@app.config.width / 2, width - @app.config.width)
+				y: @player.y + @rnd(@app.config.height / 2, height - @app.config.height)
 		@spawnlag += Math.max 0, 500 - @player.trashed * 25
+		new kind @, pos.x, pos.y
 
 	pause: () ->
 		@player?.paused = new Date()
