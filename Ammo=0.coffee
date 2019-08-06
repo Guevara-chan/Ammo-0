@@ -8,7 +8,7 @@ class Body
 	alive:	true
 	ammo:	0
 	tempo:	1.5
-	engine_off: 10
+	engine_mod: 10
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @game, x, y, trail_id) ->
@@ -61,8 +61,8 @@ class Body
 	update: () ->
 		@scene.physics.world.wrap @model, 0
 		@trail?.stop()
-		@trail?.followOffset.x = -@acceleration.x / (@engine_off * @tempo)
-		@trail?.followOffset.y = -@acceleration.y / (@engine_off * @tempo)
+		@trail?.followOffset.x = -@acceleration.x / (@engine_mod * @tempo)
+		@trail?.followOffset.y = -@acceleration.y / (@engine_mod * @tempo)
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
@@ -208,7 +208,7 @@ class Missile extends Body
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
 		@model.body.setMaxVelocity(110 * @tempo).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
 		@emitter	= emitter
-		@engine_off	+= 0.5
+		@engine_mod	+= 0.5
 
 	explode: () ->
 		super()
@@ -344,7 +344,7 @@ class Game
 		@util_ui.innerHTML		= "⋮▶Resume⋮"
 		@util_ui.onpointerdown	= @unpause.bind @
 		@util_ui.classList.add	'util_ui'
-		window.addEventListener 'resize', => @util_ui.style.fontSize = "#{@scene.game.canvas.clientWidth//15.75}px"
+		window.addEventListener 'resize', => @util_ui.style.fontSize = "#{@scene.game.canvas.clientWidth//256}em"
 		# Welcome GUI: logo.
 		@welcome = @scene.add.container cfg.width / 2, cfg.height / 2, [
 			@scene.add.text(0, 0, "Ammo:0", {fontFamily: 'Saira Stencil One', fontSize: 125, color: '#cb4154'})
