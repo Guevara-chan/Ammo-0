@@ -413,8 +413,8 @@ class Game
 
 	spawn: (x, y) ->
 		{width, height} = @scene.physics.world.bounds		
-		x = @player.x + @rnd(@app.config.width / 2, width - @app.config.width)	unless x?
-		y = @player.y + @rnd(@app.config.height / 2, height - @app.config.height) unless y?
+		x = @player.x + @rnd(@app.config.width / 2, width - @app.config.width)		unless x?
+		y = @player.y + @rnd(@app.config.height / 2, height - @app.config.height)	unless y?
 		@objects.push @enemy = new MissileBase @, x, y
 		@spawnlag += Math.max 0, 500 - @player.trashed * 25
 
