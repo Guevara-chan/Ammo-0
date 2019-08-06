@@ -326,12 +326,14 @@ class Game
 		for vol, idx in [0.15, 0.4]
 			@track_list.push @scene.sound.add("ambient:#{idx+1}",{volume: vol, delay: 5000}).on 'complete', random
 		random()
-		# Additional main UI preparations.
+		# Primary controls setup.
 		@scene.input.setPollAlways true
+		@scene.input.keyboard.on 'keydown-SPACE', => if @paused then @unpause() else @player?.switch.emit('pointerdown')
+		# Additional main UI preparations.
 		@main_id = document.getElementById 'main_ui'
 		@main_id.style.visibility	= 'visible'
 		@main_id.style.maxWidth		= "#{cfg.width}px"
-		@main_id.style.maxHieght	= "#{cfg.hieght}px"
+		@main_id.style.maxHeight	= "#{cfg.height}px"
 		# Utilitary UI preparations.
 		@util_ui				= document.getElementById('util_ui')
 		@util_ui.innerHTML		= "⋮▶Resume⋮"
