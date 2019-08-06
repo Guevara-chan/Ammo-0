@@ -273,16 +273,16 @@ class MissileBase extends Body
 # -------------------- #
 class Game
 	self = null
-	rnd: Phaser.Math.Between
+	rnd:	Phaser.Math.Between
+	paused:	false
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
 		window.resizeTo Math.max(window.innerWidth, width+20), Math.max(window.innerHeight, height+45)
 		window.moveTo (screen.width-window.outerWidth) / 2, (screen.height-window.outerHeight) / 2
 		@app = new Phaser.Game
-			type: Phaser.WEBGL, width: width, height: height, parent: 'vp'
-			scale: {mode: Phaser.Scale.SHOW_ALL, autoCenter: Phaser.Scale.CENTER_BOTH}
-
+			type: Phaser.WEBGL, width: width, height: height, parent: 'main_ui'
+			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH}
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
 			physics: 
 				default: 'arcade'
@@ -328,7 +328,10 @@ class Game
 		random()
 		# Additional main UI preparations.
 		@scene.input.setPollAlways true
-		document.getElementById('main_ui').style.visibility = 'visible'
+		@main_id = document.getElementById 'main_ui'
+		@main_id.style.visibility	= 'visible'
+		@main_id.style.maxWidth		= "#{cfg.width}px"
+		@main_id.style.maxHieght	= "#{cfg.hieght}px"
 		# Utilitary UI preparations.
 		@util_ui				= document.getElementById('util_ui')
 		@util_ui.innerHTML		= "⋮▶Resume⋮"
@@ -417,6 +420,7 @@ class Game
 		@track_list.now_playing.pause()
 		document.getElementById('util_ui').style.zIndex = 1
 		@scene.scene.pause()
+		@paused = true
 
 	unpause: () ->
 		@util_ui.style.zIndex = -1
@@ -425,6 +429,7 @@ class Game
 		@player?.switch.emit('pointerdown')
 		@track_list.now_playing.resume()
 		@scene.scene.resume()
+		@paused = false
 
 	note_record: (record) ->
 		@best = @records
