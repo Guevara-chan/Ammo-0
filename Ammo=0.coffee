@@ -328,7 +328,9 @@ class Game
 		random()
 		# Primary controls setup.
 		@scene.input.setPollAlways true
-		@scene.input.keyboard.on 'keydown-SPACE', => if @paused then @unpause() else @player?.switch.emit('pointerdown')
+		document.addEventListener 'keypress', (e) =>
+			if e.key is ' '
+				if @paused then @unpause() else @player?.switch.emit('pointerdown')
 		# Additional main UI preparations.
 		@main_id = document.getElementById 'main_ui'
 		@main_id.style.visibility	= 'visible'
@@ -438,7 +440,7 @@ class Game
 		@best.push record
 		@best.sort (a, b) -> if a.time > b.time then -1 else 1
 		localStorage[@records_key] = JSON.stringify @best[0..9]
-		console.log localStorage[@records_key]
+		#console.log localStorage[@records_key]
 
 	update: () ->
 		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
