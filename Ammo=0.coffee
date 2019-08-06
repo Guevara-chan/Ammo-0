@@ -68,6 +68,7 @@ class Body
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
 	@getter 'y',			() -> @model.y
+	@getter 'pos',			() -> @model.position
 	@getter 'acceleration', () -> @model.body.acceleration
 	@getter 'remoteness',	() -> Phaser.Math.Distance.Between(@game.player.x, @game.player.y, @x, @y)
 # -------------------- #
