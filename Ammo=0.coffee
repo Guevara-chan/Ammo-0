@@ -8,6 +8,7 @@ class Body
 	alive:	true
 	ammo:	0
 	tempo:	1.5
+	engine_off: 10
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @game, x, y, trail_id) ->
@@ -60,8 +61,8 @@ class Body
 	update: () ->
 		@scene.physics.world.wrap @model, 0
 		@trail?.stop()
-		@trail?.followOffset.x = -@acceleration.x / (10 * @tempo)
-		@trail?.followOffset.y = -@acceleration.y / (10 * @tempo)
+		@trail?.followOffset.x = -@acceleration.x / (@engine_off * @tempo)
+		@trail?.followOffset.y = -@acceleration.y / (@engine_off * @tempo)
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
