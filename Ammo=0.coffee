@@ -57,7 +57,11 @@ class Body
 		@explosion  = @game.explode.createEmitter
 			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }, scale: { start: 0.1, end: 0 }, blendMode: 'ADD'
 		.explode(magnitude * 2, @x, @y)
-		@model.destroy()
+		@model.first.setTintFill(0)
+		@model.body.destroy()		
+		#@model.destroy()
+		@scene.tweens.add
+			targets: @model, alpha: 0, ease: 'Power1', duration: 200, onComplete: () => @model.destroy()
 		@trail?.stopFollow().stop()
 		@requiem?.play @volume()
 		@alive = false
@@ -67,8 +71,7 @@ class Body
 		@trail?.stop()
 		@trail?.followOffset.x = -Math.cos(@model.rotation-3.14/2) * @engine_off
 		@trail?.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
-		#@trail?.followOffset.x = -@acceleration.x / (@engine_off * @tempo)
-		#@trail?.followOffset.y = -@acceleration.y / (@engine_off * @tempo)
+		@model.body.setAcceleration(0)
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
@@ -169,7 +172,6 @@ class Player extends Body
 			@scene.input.activePointer.position.y
 		@target.first.rotation -= 0.025
 		@orient @target
-		@model.body.setAcceleration(0)
 		# Controls.
 		@model.body.setDrag(if @mass_damping then 0.95 else 1)
 		@target.first.setTint if @scene.input.activePointer.isDown
