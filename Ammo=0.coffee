@@ -58,8 +58,7 @@ class Body
 			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }, scale: { start: 0.1, end: 0 }, blendMode: 'ADD'
 		.explode(magnitude * 2, @x, @y)
 		@model.first.setTintFill(0)
-		@model.body.destroy()		
-		#@model.destroy()
+		@model.body.destroy()
 		@scene.tweens.add
 			targets: @model, alpha: 0, ease: 'Power1', duration: 200, onComplete: () => @model.destroy()
 		@trail?.stopFollow().stop()
@@ -71,7 +70,9 @@ class Body
 		@trail?.stop()
 		@trail?.followOffset.x = -Math.cos(@model.rotation-3.14/2) * @engine_off
 		@trail?.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
-		@model.body.setAcceleration(0)
+		#@model.body.setAngularAcceleration 0
+		@model.body.setAngularVelocity(0)
+		@model.body.setAcceleration 0
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
@@ -171,13 +172,22 @@ class Player extends Body
 		Object.assign @target, @scene.cameras.main.getWorldPoint @scene.input.activePointer.position.x,
 			@scene.input.activePointer.position.y
 		@target.first.rotation -= 0.025
-		@orient @target
 		# Controls.
 		@model.body.setDrag(if @mass_damping then 0.95 else 1)
-		@target.first.setTint if @scene.input.activePointer.isDown
-			@propel(200)
-			0x00FFFF
-		else 0x708090
+		@target.visible = switch @game.controller
+			when 'mouse'
+				@orient @target
+				@target.first.setTint if @scene.input.activePointer.isDown
+					@propel(200)
+					0x00FFFF
+				else 0x708090
+				true
+			when 'keyboard'
+				if @game.controls.up.isDown		then @propel(200)
+				if @game.controls.left.isDown	then @turn(-200)
+				if @game.controls.right.isDown	then @turn(200)
+				false
+
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
@@ -204,7 +214,6 @@ class Player extends Body
 		# HUD update: ammo counter.
 		@hud.list[6].setText "Ammo:#{@ammo}"
 		# Finalization.
-		@target.visible = true
 		@alive
 
 	# --Properties goes here.
@@ -287,9 +296,10 @@ class MissileBase extends Body
 		@alive
 # -------------------- #
 class Game
-	self = null
-	rnd:	Phaser.Math.Between
-	paused:	false
+	self		= null
+	rnd:		Phaser.Math.Between
+	paused:		false
+	controller:	'mouse'
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
@@ -343,6 +353,7 @@ class Game
 		random()
 		# Primary controls setup.
 		@scene.input.setPollAlways true
+		@controls = @scene.input.keyboard.createCursorKeys()
 		document.addEventListener 'keypress', (e) =>
 			if e.key is ' '
 				if @paused then @unpause() else @player?.switch.emit('pointerdown')
