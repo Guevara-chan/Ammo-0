@@ -87,6 +87,7 @@ class Player extends Body
 		@game.spacecrafts.add @model
 		@model.setScale 0.15, 0.15
 		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130).setDrag(0.95).useDamping = true
+		@engine_off	+= 4
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		# Crosshair
