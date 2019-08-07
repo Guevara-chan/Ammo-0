@@ -426,10 +426,10 @@ class Game
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
 			# Init setup.
+			x_off = y_off			= 250
 			{x, y, width, height}	= @scene.physics.world.bounds
-			[x_off, y_off]			= [width / 10, height / 10]
-			spawn_row	= [x+x_off...width/2-x_off]
-			spawn_area	= ({y: idx, row: [spawn_row...]} for idx in [y+y_off...height/2-y_off])
+			spawn_row				= [x+x_off...width/2-x_off]
+			spawn_area				= ({y: idx, row: [spawn_row...]} for idx in [y+y_off...height/2-y_off])
 			# Aux procs.
 			project =
 				y: (coord) -> coord + height / 2 - y_off
