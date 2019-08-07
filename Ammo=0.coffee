@@ -79,6 +79,7 @@ class Body
 # -------------------- #
 class Player extends Body
 	trashed: 0
+	mass_damping: on
 
 	# --Methods goes here.
 	constructor: (game, cfg, x = 0, y = 0) ->
@@ -86,7 +87,7 @@ class Player extends Body
 		super 'pship', game, x, y, 'jet'
 		@game.spacecrafts.add @model
 		@model.setScale 0.15, 0.15
-		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130).setDrag(0.95).useDamping = true
+		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130).useDamping = true
 		@engine_off	+= 4
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
@@ -170,6 +171,7 @@ class Player extends Body
 		@orient @target
 		@model.body.setAcceleration(0)
 		# Controls.
+		@model.body.setDrag(if @mass_damping then 0.95 else 1)
 		@target.first.setTint if @scene.input.activePointer.isDown
 			@propel(200)
 			0x00FFFF
@@ -195,7 +197,7 @@ class Player extends Body
 		best = @game.records
 		{time, trashed}=(if best.length and @flytime < best[0].time then best[0] else {time:@flytime,trashed:@trashed})
 		if @flytime >= time# or true
-			@hud.list[4].setColor('crimson').setText "●#{@hud.list[2].text[2..]}⋮☠#{trashed}"
+			@hud.list[4].setColor('crimson').setText "●#{@hud.list[2].text[2..-2]}⋮☠#{trashed}"
 		else @hud.list[4].setColor('goldenrod').setText "🏆#{tformat(time//1000).join(':')}⋮☠#{trashed}"
 		# HUD update: ammo counter.
 		@hud.list[6].setText "Ammo:#{@ammo}"
