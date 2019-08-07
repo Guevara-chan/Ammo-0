@@ -129,7 +129,7 @@ class Player extends Body
 	explode: () ->
 		super()
 		# HUD replacement.
-		@scene.postmortem = @scene.add.container 1024/2, 768/2, [
+		@scene.postmortem = @scene.add.container @scene.game.config.width/2, @scene.game.config.height/2, [
 			@scene.add.text(0, 0, @hud.list[2].text.replace('.', ':')[2..], 
 				{fontFamily: 'Saira Stencil One', fontSize: 100, color: 'crimson'}).setOrigin(0.5, 1)
 					.setShadow(0, 0, "#cb4154", 7, true, true)
@@ -422,13 +422,30 @@ class Game
 
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
-			{x, y, width, height} = @scene.physics.world.bounds
-			spawn_line = [x...width/2]
-			spawn_area = ([spawn_line...] for row in [y...height/2])
-			pos =
-				x: @player.x + @rnd(@app.config.width / 2, width - @app.config.width)
-				y: @player.y + @rnd(@app.config.height / 2, height - @app.config.height)
+			# Init setup.
+			{x, y, width, height}	= @scene.physics.world.bounds
+			[x_off, y_off]			= [width / 10, height / 10]
+			spawn_row	= [x+x_off...width/2-x_off]
+			spawn_area	= ({y: idx, row: [spawn_row...]} for idx in [y+y_off...height/2-y_off])
+			# Aux procs.
+			project =
+				y: (coord) -> coord + height / 2 - y_off
+				x: (coord) -> coord + width  / 2 - x_off
+			cut_rect = (array, left, top, vlen, hlen) ->
+				console.log left, top, vlen, hlen
+				[left, top] = [Math.max(0, project.x left), Math.max(0, project.y top)]
+				for idx in [top...Math.min(array.length-1, top + hlen)]
+					array[idx].row.splice left, vlen
+			# Additional setup.
+			cut_rect spawn_area, @player.x // 1 - 1024 / 2, @player.y // 1 - 768 / 2, 1024, 768
+			# Position picking.
+			spawn_area = spawn_area.filter (line) -> line.row.length
+			pos		= {y: @rnd 0, spawn_area.length-1}
+			pos.x	= (spawn_row = spawn_area[pos.y].row)[@rnd 0, spawn_row.length-1]
+			pos.y	= spawn_area[pos.y].y
+		# Actual spawning.
 		@spawnlag += Math.max 0, 500 - @player.trashed * 25
+		console.log pos
 		new kind @, pos.x, pos.y
 
 	pause: () ->
