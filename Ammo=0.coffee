@@ -8,7 +8,7 @@ class Body
 	alive:	true
 	ammo:	0
 	tempo:	1.5
-	engine_mod: 10
+	engine_off: 20
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @game, x, y, trail_id) ->
@@ -65,8 +65,10 @@ class Body
 	update: () ->
 		@scene.physics.world.wrap @model, 0
 		@trail?.stop()
-		@trail?.followOffset.x = -@acceleration.x / (@engine_mod * @tempo)
-		@trail?.followOffset.y = -@acceleration.y / (@engine_mod * @tempo)
+		@trail?.followOffset.x = -Math.cos(@model.rotation-3.14/2) * @engine_off
+		@trail?.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
+		#@trail?.followOffset.x = -@acceleration.x / (@engine_off * @tempo)
+		#@trail?.followOffset.y = -@acceleration.y / (@engine_off * @tempo)
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
@@ -213,7 +215,7 @@ class Missile extends Body
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
 		@model.body.setMaxVelocity(110 * @tempo).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
 		@emitter	= emitter
-		@engine_mod	+= 0.5
+		@engine_off	-= 1
 
 	explode: () ->
 		super()
