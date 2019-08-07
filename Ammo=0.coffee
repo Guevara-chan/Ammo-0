@@ -130,7 +130,7 @@ class Player extends Body
 		super()
 		# HUD replacement.
 		@scene.postmortem = @scene.add.container @scene.game.config.width/2, @scene.game.config.height/2, [
-			@scene.add.text(0, 0, @hud.list[2].text.replace('.', ':')[2..], 
+			@scene.add.text(0, 0, @hud.list[2].text.replace('.', ':')[2..-2], 
 				{fontFamily: 'Saira Stencil One', fontSize: 100, color: 'crimson'}).setOrigin(0.5, 1)
 					.setShadow(0, 0, "#cb4154", 7, true, true)
 			@scene.add.text(0, 0, "☠"+@trashed, 
@@ -179,7 +179,7 @@ class Player extends Body
 		msecs	= @flytime
 		secs	= msecs // 1000
 		@hud.list[2].setText ['🕐','🕑','🕒','🕓','🕔','🕕','🕖','🕗','🕘','🕙','🕚','🕛'][msecs // 100 % 12] +
-			tformat(secs).join ':.'[msecs // 500 % 2]
+			tformat(secs).join(':.'[msecs // 500 % 2]) + "\n"
 		@hud.list[2].setColor('#f8' + Math.max(0x30, 0xef - secs).toString(16).padStart(2, '0').repeat(2))
 		# HUD update: threat level.
 		if @game.enemies is 0 then @hud.list[3].setText("No threat ?").setColor('#708090')
@@ -432,7 +432,6 @@ class Game
 				y: (coord) -> coord + height / 2 - y_off
 				x: (coord) -> coord + width  / 2 - x_off
 			cut_rect = (array, left, top, vlen, hlen) ->
-				console.log left, top, vlen, hlen
 				[left, top] = [Math.max(0, project.x left), Math.max(0, project.y top)]
 				for idx in [top...Math.min(array.length-1, top + hlen)]
 					array[idx].row.splice left, vlen
