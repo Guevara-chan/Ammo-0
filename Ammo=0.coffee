@@ -116,7 +116,7 @@ class Player extends Body
 		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (pause).
-		@hud.add @switch = Game.text_button @scene, cfg.width - 80, 14, () =>
+		@hud.add @switch = Game.text_button @scene, cfg.width - 125, 14, () =>
 			if @switch.state isnt 0 then @game.pause()
 			@switch.setText "\n"+["", "❚❚"][@switch.state = 1 - @switch.state]
 		@switch.setColor('gray').state = 0
@@ -186,8 +186,8 @@ class Player extends Body
 				if @game.controls.up.isDown		then @propel(200)
 				if @game.controls.left.isDown	then @turn(-200)
 				if @game.controls.right.isDown	then @turn(200)
+				if @game.controls.down.isDown	then @mass_damping = not @mass_damping 
 				false
-
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
@@ -299,7 +299,6 @@ class Game
 	self		= null
 	rnd:		Phaser.Math.Between
 	paused:		false
-	controller:	'mouse'
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
@@ -341,6 +340,11 @@ class Game
 		@[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@steam.setDepth(1)
 		# SFX switcher.
+		@schemer = Game.text_button @scene, @app.config.width - 80, 14, () ->
+			@game.controller = ['mouse', 'keyboard'][@state]; @setText "\n"+["⌨️", "🖱️"][@state = 1 - @state]
+		@schemer.game	= @
+		@schemer.state	= 0
+		@schemer.emit('pointerdown')
 		@muter = Game.text_button @scene, @app.config.width - 35, 14, () ->
 			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]
 		@muter.state = 0
