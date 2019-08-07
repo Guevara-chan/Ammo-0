@@ -24,6 +24,9 @@ class Body
 				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: () => @model.angle + 90
 			.startFollow @model, true, 0.05, 0.05
 
+	turn: (speed) ->
+		@model.body.setAngularVelocity speed
+
 	orient: (dest, speed = 200) ->
 		# Init setup.
 		proj =  {x: dest.x, y: dest.y}
@@ -37,7 +40,7 @@ class Body
 		angle = Phaser.Math.Angle.Between(@x, @y, proj.x, proj.y﻿)﻿
 		delta = @model.rotation - angle - 3.14 * (if angle > 3.14 / 2 then -1.5 else 0.5)
 		if Math.abs(delta) > 3.14 then delta = -delta
-		@model.body.setAngularVelocity -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
+		@turn -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
 
 	propel: (impulse) ->
 		@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
@@ -266,7 +269,7 @@ class MissileBase extends Body
 	update: () ->
 		super()
 		return true unless @teleport.progress is 1
-		@model.body.setAngularVelocity(100)
+		@turn 100
 		if @reload++ is 100 and @shoot(Missile, @game.player)
 			@silo.explode(80, @x, @y)
 			@scene.sound.add("steam").on('completed', (snd) -> snd.destroy()).play(@volume())
@@ -420,6 +423,8 @@ class Game
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
 			{x, y, width, height} = @scene.physics.world.bounds
+			spawn_line = [x...width/2]
+			spawn_area = ([spawn_line...] for row in [y...height/2])
 			pos =
 				x: @player.x + @rnd(@app.config.width / 2, width - @app.config.width)
 				y: @player.y + @rnd(@app.config.height / 2, height - @app.config.height)
