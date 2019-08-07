@@ -183,10 +183,10 @@ class Player extends Body
 				else 0x708090
 				true
 			when 'keyboard'
-				if @game.controls.up.isDown		then @propel(200)
-				if @game.controls.left.isDown	then @turn(-200)
-				if @game.controls.right.isDown	then @turn(200)
-				if @game.controls.down.isDown	then @mass_damping = not @mass_damping 
+				if @game.controls.UP.isDown		or @game.controls.W.isDown then @propel(200)
+				if @game.controls.LEFT.isDown	or @game.controls.A.isDown then @turn(-200)
+				if @game.controls.RIGHT.isDown	or @game.controls.D.isDown then @turn(200)
+				if @game.controls.DOWN.isDown	or @game.controls.S.isDown then @mass_damping = not @mass_damping 
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
@@ -357,7 +357,7 @@ class Game
 		random()
 		# Primary controls setup.
 		@scene.input.setPollAlways true
-		@controls = @scene.input.keyboard.createCursorKeys()
+		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D')
 		document.addEventListener 'keypress', (e) =>
 			if e.key is ' '
 				if @paused then @unpause() else @player?.switch.emit('pointerdown')
