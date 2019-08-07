@@ -395,6 +395,7 @@ class Game
 		@enemies	= 0
 		@player		= new Player @, @app.config
 		# World setup.
+		@edge			= {v: 250, h: 250}
 		[width, height] = [2500, 2500]
 		[x, y]			= [-width / 2, -height / 2]
 		@scene.physics.world.setBounds	x, y, width, height
@@ -426,14 +427,13 @@ class Game
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
 			# Init setup.
-			x_off = y_off			= 250
 			{x, y, width, height}	= @scene.physics.world.bounds
-			spawn_row				= [x+x_off...width/2-x_off]
-			spawn_area				= ({y: idx, row: [spawn_row...]} for idx in [y+y_off...height/2-y_off])
+			spawn_row				= [x+@edge.h...width/2-@edge.h]
+			spawn_area				= ({y: idx, row: [spawn_row...]} for idx in [y+@edge.v...height/2-@edge.v])
 			# Aux procs.
 			project =
-				y: (coord) -> coord + height / 2 - y_off
-				x: (coord) -> coord + width  / 2 - x_off
+				y: (coord) => coord + height / 2 - @edge.v
+				x: (coord) => coord + width  / 2 - @edge.h
 			cut_rect = (array, left, top, vlen, hlen) ->
 				[left, top] = [Math.max(0, project.x left), Math.max(0, project.y top)]
 				for idx in [top...Math.min(array.length-1, top + hlen)]
