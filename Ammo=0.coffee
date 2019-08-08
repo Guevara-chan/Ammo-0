@@ -529,8 +529,8 @@ class Game
 	@getter 'paused',		() -> @paused_
 	@getter 'records_key',	() -> "#{@mode}:#{@zone}:best"
 	@getter 'records',		() -> JSON.parse(localStorage[@records_key] ? "[]")
-	@setter 'muted',		(val) -> @muter.sync @scene.sound.mute = val
-	@setter 'controller',	(val) -> @schemer.sync @controller_ = val
+	@setter 'muted',		(val) -> @muter.sync localStorage['muted'] = @scene.sound.mute = val
+	@setter 'controller',	(val) -> @schemer.sync localStorage['controller'] = @controller_ = val
 	@setter 'paused',		(val) -> @player?.switch.sync(val); if @paused_=val then @pause() else @unpause()
 #.}
 
