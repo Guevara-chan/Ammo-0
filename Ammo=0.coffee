@@ -302,7 +302,6 @@ class Game
 	self		= null
 	rnd:		Phaser.Math.Between
 	paused_:	false
-	controller_:'mouse'
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
@@ -345,12 +344,15 @@ class Game
 		@[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@steam.setDepth(1)
 		# Switchers.
-		@schemer	= Game.text_switcher @, @app.config.width - 80, 14, @controller_,
+		@schemer	= Game.text_switcher @, @app.config.width - 80, 14, @controller,
 			(()		-> @game.controller = ['mouse', 'keyboard'].find (x) => x isnt @game.controller), 
 			((val)	-> @setText "\n" + {mouse: "🖱️", keyboard: "⌨️"}[val])
 		@muter		= Game.text_switcher @, @app.config.width - 35, 14, @muted,
 			(() -> @game.muted = not @game.muted)
 			((val)	-> @setText "\n" + ["🔊", "🔈"][0 + val])
+		@controller = localStorage['controller'] ? 'mouse'
+		@muted		= JSON.parse(localStorage['muted'] ? 'false')
+		console.log @muted
 		# Ambient music.
 		@track_list = []
 		random = (-> (@now_playing = @[Phaser.Math.Between 0, @length-1]).play()).bind @track_list
