@@ -186,10 +186,9 @@ class Player extends Body
 				if any_down 'LEFT',	'A'	then @turn -200
 				if any_down 'RIGHT','D' then @turn 200
 				if any_down 'DOWN',	'S' then @mass_damping = not @mass_damping 
-				#if (axes = @scene.input.gamepad.getPad(0)?.axes)?
-				#	@orient 
-				#		x: @x + Math.cos axes[0].getValue()
-				#		y: @y + Math.sin axes[1].getValue()
+				if (axes = @scene.input.gamepad.getPad(0)?.axes)?
+					[xshift, yshift] = [axes[0].getValue(), axes[1].getValue()]
+					if xshift or yshift then @orient {x: @x + xshift, y: @y + yshift}; @propel(200)
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
