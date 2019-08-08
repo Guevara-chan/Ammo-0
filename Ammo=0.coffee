@@ -352,7 +352,6 @@ class Game
 			((val)	-> @setText "\n" + ["🔊", "🔈"][0 + val])
 		@controller = localStorage['controller'] ? 'mouse'
 		@muted		= JSON.parse(localStorage['muted'] ? 'false')
-		console.log @muted
 		# Ambient music.
 		@track_list = []
 		random = (-> (@now_playing = @[Phaser.Math.Between 0, @length-1]).play()).bind @track_list
