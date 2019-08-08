@@ -116,11 +116,10 @@ class Player extends Body
 		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (pause).
-		@hud.add @switch = Game.text_button @scene, cfg.width - 125, 14, () =>
-			if @switch.state isnt 0 then @game.pause()
-			@switch.setText "\n"+["", "❚❚"][@switch.state = 1 - @switch.state]
-		@switch.setColor('gray').state = 0
-		@switch.emit('pointerdown')
+		@hud.add @switch = Game.text_switcher @game, cfg.width - 125, 14, () ->
+			if @state isnt 0 then @game.pause()
+			@setText "\n"+["", "❚❚"][@state = 1 - @state]
+		@switch.setColor('gray')
 		# Hud setup (ammo counter, threat gauge)
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
 			.setShadow 0, 0, "crimson", 7, true, true)
@@ -341,15 +340,10 @@ class Game
 		@[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@steam.setDepth(1)
 		# SFX switcher.
-		@schemer = Game.text_button @scene, @app.config.width - 80, 14, () ->
+		@schemer	= Game.text_switcher @, @app.config.width - 80, 14, () ->
 			@game.controller = ['mouse', 'keyboard'][@state]; @setText "\n"+["⌨️", "🖱️"][@state = 1 - @state]
-		@schemer.game	= @
-		@schemer.state	= 0
-		@schemer.emit('pointerdown')
-		@muter = Game.text_button @scene, @app.config.width - 35, 14, () ->
+		@muter		= Game.text_switcher @, @app.config.width - 35, 14, () ->
 			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]
-		@muter.state = 0
-		@muter.emit('pointerdown')
 		# Ambient music.
 		@track_list = []
 		random = (-> (@now_playing = @[Phaser.Math.Between 0, @length-1]).play()).bind @track_list
@@ -518,6 +512,13 @@ class Game
 		btn.on('pointerover',	(-> @setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind btn)
 		.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind btn)
 		.on('pointerdown',	click_handler)
+		return btn
+
+	@text_switcher: (game, x, y, click_handler) ->
+		btn = Game.text_button game.scene, x, y, click_handler
+		btn.state	= 0
+		btn.game  	= game
+		btn.emit('pointerdown')
 		return btn
 
 	# --Properties goes here.
