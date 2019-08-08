@@ -70,8 +70,7 @@ class Body
 		@trail?.stop()
 		@trail?.followOffset.x = -Math.cos(@model.rotation-3.14/2) * @engine_off
 		@trail?.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
-		#@model.body.setAngularAcceleration 0
-		@model.body.setAngularVelocity(0)
+		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
 
 	# --Properties goes here.
@@ -116,9 +115,9 @@ class Player extends Body
 		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (pause).
-		@hud.add @switch = Game.text_switcher @game, cfg.width - 125, 14, () ->
-			if @state isnt 0 then @game.pause()
-			@setText "\n"+["", "❚❚"][@state = 1 - @state]
+		@hud.add @switch = Game.text_switcher @game, cfg.width - 125, 14, @game.paused,
+			(() -> @game.paused = not @game.paused), 
+			((val) -> @setText "\n" + ["❚❚", ""][0 + val])
 		@switch.setColor('gray')
 		# Hud setup (ammo counter, threat gauge)
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
@@ -183,10 +182,14 @@ class Player extends Body
 				true
 			when 'keyboard'
 				any_down = (keylist...) => for key in keylist then return true if @game.controls[key].isDown
-				if any_down 'UP',	'W'	then @propel(200)
-				if any_down 'LEFT',	'A'	then @turn(-200)
-				if any_down 'RIGHT','D' then @turn(200)
+				if any_down 'UP',	'W'	then @propel 200
+				if any_down 'LEFT',	'A'	then @turn -200
+				if any_down 'RIGHT','D' then @turn 200
 				if any_down 'DOWN',	'S' then @mass_damping = not @mass_damping 
+				if (axes = @scene.input.gamepad.getPad(0)?.axes)?
+					@orient 
+						x: @x + Math.cos axes[0].getValue()
+						y: @y + Math.sin axes[1].getValue()
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
@@ -298,7 +301,8 @@ class MissileBase extends Body
 class Game
 	self		= null
 	rnd:		Phaser.Math.Between
-	paused:		false
+	paused_:	false
+	controller_:'mouse'
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
@@ -306,13 +310,14 @@ class Game
 		window.moveTo (screen.width-window.outerWidth) / 2, (screen.height-window.outerHeight) / 2
 		@app = new Phaser.Game
 			type: Phaser.WEBGL, width: width, height: height, parent: 'main_ui'
-			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_VERTICALLY }
+			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_VERTICALLY}
 			scene: {preload: @preload, create: @create.bind(@), update: @update.bind(@)}
+			input: {gamepad: true}
 			physics: 
 				default: 'arcade'
 				# arcade:
 				# 	debug: true
-			onPause: @pause.bind @
+			onPause: => @paused = true
 		self = @
 
 	preload: () ->
@@ -339,11 +344,13 @@ class Game
 		# Particle setup.
 		@[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@steam.setDepth(1)
-		# SFX switcher.
-		@schemer	= Game.text_switcher @, @app.config.width - 80, 14, () ->
-			@game.controller = ['mouse', 'keyboard'][@state]; @setText "\n"+["⌨️", "🖱️"][@state = 1 - @state]
-		@muter		= Game.text_switcher @, @app.config.width - 35, 14, () ->
-			@scene.sound.setMute @state; @setText "\n"+["🔈", "🔊"][@state = 1 - @state]
+		# Switchers.
+		@schemer	= Game.text_switcher @, @app.config.width - 80, 14, @controller_,
+			(()		-> @game.controller = ['mouse', 'keyboard'].find (x) => x isnt @game.controller), 
+			((val)	-> @setText "\n" + {mouse: "🖱️", keyboard: "⌨️"}[val])
+		@muter		= Game.text_switcher @, @app.config.width - 35, 14, @muted,
+			(() -> @game.muted = not @game.muted)
+			((val)	-> @setText "\n" + ["🔊", "🔈"][0 + val])
 		# Ambient music.
 		@track_list = []
 		random = (-> (@now_playing = @[Phaser.Math.Between 0, @length-1]).play()).bind @track_list
@@ -353,9 +360,7 @@ class Game
 		# Primary controls setup.
 		@scene.input.setPollAlways true
 		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D')
-		document.addEventListener 'keypress', (e) =>
-			if e.key is ' '
-				if @paused then @unpause() else @player?.switch.emit('pointerdown')
+		document.addEventListener 'keypress', (e) => if e.key is ' ' then @paused = not @paused
 		# Additional main UI preparations.
 		@main_id = document.getElementById 'main_ui'
 		@main_id.style.visibility	= 'visible'
@@ -364,7 +369,7 @@ class Game
 		# Utilitary UI preparations.
 		@util_ui				= document.getElementById('util_ui')
 		@util_ui.innerHTML		= "⋮▶Resume⋮"
-		@util_ui.onpointerdown	= @unpause.bind @
+		@util_ui.onpointerdown	= => @paused = false
 		@util_ui.classList.add	'util_ui'
 		window.addEventListener 'resize', => @util_ui.style.fontSize = "#{@scene.game.canvas.clientWidth/256}em"
 		# Welcome GUI: logo.
@@ -470,16 +475,13 @@ class Game
 		@track_list.now_playing.pause()
 		document.getElementById('util_ui').style.zIndex = 1
 		@scene.scene.pause()
-		@paused = true
 
 	unpause: () ->
 		@util_ui.style.zIndex = -1
 		@scene.game.canvas.style.opacity = 1
 		@player?.departure = @player.departure - 0 + (new Date() - @player.paused)
-		@player?.switch.emit('pointerdown')
 		@track_list.now_playing.resume()
 		@scene.scene.resume()
-		@paused = false
 
 	note_record: (record) ->
 		@best = @records
@@ -514,16 +516,22 @@ class Game
 		.on('pointerdown',	click_handler)
 		return btn
 
-	@text_switcher: (game, x, y, click_handler) ->
-		btn = Game.text_button game.scene, x, y, click_handler
-		btn.state	= 0
-		btn.game  	= game
-		btn.emit('pointerdown')
+	@text_switcher: (game, x, y, init_val, click_handler, switch_handler) ->
+		btn				= Game.text_button game.scene, x, y, click_handler
+		btn.sync		= switch_handler?.bind btn
+		btn.game		= game
+		btn.sync(init_val)
 		return btn
 
 	# --Properties goes here.
+	@getter 'muted',		() -> @scene.sound.mute
+	@getter 'controller',	() -> @controller_
+	@getter 'paused',		() -> @paused_
 	@getter 'records_key',	() -> "#{@mode}:#{@zone}:best"
 	@getter 'records',		() -> JSON.parse(localStorage[@records_key] ? "[]")
+	@setter 'muted',		(val) -> @muter.sync @scene.sound.mute = val
+	@setter 'controller',	(val) -> @schemer.sync @controller_ = val
+	@setter 'paused',		(val) -> @player?.switch.sync(val); if @paused_=val then @pause() else @unpause()
 #.}
 
 # ==Main code==
