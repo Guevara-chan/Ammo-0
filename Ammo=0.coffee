@@ -183,10 +183,11 @@ class Player extends Body
 				else 0x708090
 				true
 			when 'keyboard'
-				if @game.controls.UP.isDown		or @game.controls.W.isDown then @propel(200)
-				if @game.controls.LEFT.isDown	or @game.controls.A.isDown then @turn(-200)
-				if @game.controls.RIGHT.isDown	or @game.controls.D.isDown then @turn(200)
-				if @game.controls.DOWN.isDown	or @game.controls.S.isDown then @mass_damping = not @mass_damping 
+				any_down = (keylist...) => for key in keylist then return true if @game.controls[key].isDown
+				if any_down 'UP',	'W'	then @propel(200)
+				if any_down 'LEFT',	'A'	then @turn(-200)
+				if any_down 'RIGHT','D' then @turn(200)
+				if any_down 'DOWN',	'S' then @mass_damping = not @mass_damping 
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
