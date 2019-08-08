@@ -7,6 +7,7 @@ Initially made in ~3 days using [Phaser3](https://phaser.io/phaser3), project is
 * Zero ammunition.
 * Lots of enemy rockets.
 * Infinite pacifistic carnage.
+* Omnicontrol scheme: mouse ? Sticks ? WASD ? Arrows ? D-Pad ? All variants was covered.
 
 # ⋮Compatibility⋮
 __Ammo:0__ was best tested with _Chrome 76_ and [Electron](https://electronjs.org/), which is used to develop it.  
