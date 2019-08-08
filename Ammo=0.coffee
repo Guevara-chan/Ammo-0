@@ -186,10 +186,10 @@ class Player extends Body
 				if any_down 'LEFT',	'A'	then @turn -200
 				if any_down 'RIGHT','D' then @turn 200
 				if any_down 'DOWN',	'S' then @mass_damping = not @mass_damping 
-				if (axes = @scene.input.gamepad.getPad(0)?.axes)?
-					@orient 
-						x: @x + Math.cos axes[0].getValue()
-						y: @y + Math.sin axes[1].getValue()
+				#if (axes = @scene.input.gamepad.getPad(0)?.axes)?
+				#	@orient 
+				#		x: @x + Math.cos axes[0].getValue()
+				#		y: @y + Math.sin axes[1].getValue()
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
@@ -461,6 +461,7 @@ class Game
 				[left, top] = [Math.max(0, @spawner.proj.x left), Math.max(0, @spawner.proj.y top)]
 				for idx in [top...Math.min(array.length-1, top + hlen)]
 					array[idx].row.splice left, vlen
+					#array[idx].row.fill -Infinity, left, left+vlen
 			# Additional setup.
 			cut_rect spawn_area, @player.x // 1 - 1024 / 2, @player.y // 1 - 768 / 2, 1024, 768
 			# Position picking.
