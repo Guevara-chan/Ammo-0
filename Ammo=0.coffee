@@ -437,6 +437,10 @@ class Game
 		@briefing.setOrigin(0.5, 0.5).setShadow(0, 0, "lightcoral", 7, true, true)
 		@scene.tweens.add cfg =
 			targets: @briefing, alpha: 0, duration: 1300, scaleX: 0.6, y: @player.model.y, ease: 'Sine.easeInOut'
+		# Spawning area.
+		{x, y, width, height}	= @scene.physics.world.bounds
+		spawn_row				= [x+@edge.h...width/2-@edge.h]
+		@spawn_area				= ({y: idx, row: [spawn_row...]} for idx in [y+@edge.v...height/2-@edge.v])
 		# Finalization.
 		@welcome?.destroy()
 		@welcome?.beat.remove()
@@ -447,9 +451,8 @@ class Game
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
 			# Init setup.
-			{x, y, width, height}	= @scene.physics.world.bounds
-			spawn_row				= [x+@edge.h...width/2-@edge.h]
-			spawn_area				= ({y: idx, row: [spawn_row...]} for idx in [y+@edge.v...height/2-@edge.v])
+			{width, height}	= @scene.physics.world.bounds
+			spawn_area		= [@spawn_area...]
 			# Aux procs.
 			project =
 				y: (coord) => coord + height / 2 - @edge.v
