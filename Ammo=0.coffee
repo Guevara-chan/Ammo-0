@@ -437,10 +437,14 @@ class Game
 		@briefing.setOrigin(0.5, 0.5).setShadow(0, 0, "lightcoral", 7, true, true)
 		@scene.tweens.add cfg =
 			targets: @briefing, alpha: 0, duration: 1300, scaleX: 0.6, y: @player.model.y, ease: 'Sine.easeInOut'
-		# Spawning area.
+		# Spawning cache.
 		{x, y, width, height}	= @scene.physics.world.bounds
 		spawn_row				= [x+@edge.h...width/2-@edge.h]
-		@spawn_area				= ({y: idx, row: [spawn_row...]} for idx in [y+@edge.v...height/2-@edge.v])
+		@spawner =
+			area: ({y: idx, row: [spawn_row...]} for idx in [y+@edge.v...height/2-@edge.v])
+			proj:
+				y: (coord) => coord + height / 2 - @edge.v
+				x: (coord) => coord + width  / 2 - @edge.h
 		# Finalization.
 		@welcome?.destroy()
 		@welcome?.beat.remove()
@@ -451,14 +455,10 @@ class Game
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
 			# Init setup.
-			{width, height}	= @scene.physics.world.bounds
-			spawn_area		= [@spawn_area...]
-			# Aux procs.
-			project =
-				y: (coord) => coord + height / 2 - @edge.v
-				x: (coord) => coord + width  / 2 - @edge.h
-			cut_rect = (array, left, top, vlen, hlen) ->
-				[left, top] = [Math.max(0, project.x left), Math.max(0, project.y top)]
+			spawn_area		= [@spawner.area...]
+			# Aux proc.
+			cut_rect = (array, left, top, vlen, hlen) =>
+				[left, top] = [Math.max(0, @spawner.proj.x left), Math.max(0, @spawner.proj.y top)]
 				for idx in [top...Math.min(array.length-1, top + hlen)]
 					array[idx].row.splice left, vlen
 			# Additional setup.
