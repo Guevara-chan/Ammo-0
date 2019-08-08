@@ -182,13 +182,15 @@ class Player extends Body
 				true
 			when 'keyboard'
 				any_down = (keylist...) => for key in keylist then return true if @game.controls[key].isDown
-				if any_down 'UP',	'W'	then @propel 200
-				if any_down 'LEFT',	'A'	then @turn -200
-				if any_down 'RIGHT','D' then @turn 200
-				if any_down 'DOWN',	'S' then @mass_damping = not @mass_damping 
-				if (axes = @scene.input.gamepad.getPad(0)?.axes)?
-					[xshift, yshift] = [axes[0].getValue(), axes[1].getValue()]
-					if xshift or yshift then @orient {x: @x + xshift, y: @y + yshift}; @propel(200)
+				pad = @scene.input.gamepad.getPad(0)
+				[xshift, yshift] = if (axes = pad?.axes)? then [axes[0].getValue(), axes[1].getValue()] else [0, 0]
+				if xshift or yshift # Stick control.
+					@orient {x: @x + xshift, y: @y + yshift}; @propel(200)
+				else # Buttons control.
+					if pad?.A		or any_down 'UP',	'W'	then @propel 200
+					if pad?.left	or any_down 'LEFT',	'A'	then @turn -200
+					if pad?.right 	or any_down 'RIGHT','D' then @turn 200
+					if pad?.B		or any_down 'DOWN',	'S' then @mass_damping = not @mass_damping
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
