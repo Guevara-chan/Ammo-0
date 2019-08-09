@@ -16,6 +16,6 @@ _No __iOs__ support was achieved so far._
 
 # ⋮Brief spampling of weaponless warfare⋮
 ![image](https://user-images.githubusercontent.com/8768470/62809552-ee5ed880-bb03-11e9-95ca-166fe09b607a.png)
-![image](https://user-images.githubusercontent.com/8768470/62489013-5b096880-b7ce-11e9-8e89-8a5e03976b59.png)
+![image](https://user-images.githubusercontent.com/8768470/62810331-3da60880-bb06-11e9-87d5-c165249ce8eb.png)
 ![image](https://user-images.githubusercontent.com/8768470/62774627-03108180-baae-11e9-884c-403b84820750.png)
 
