@@ -1,5 +1,5 @@
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Ammo:0 antishooter game v0.03
+# Ammo:0 antishooter game v0.04
 # Developed in 2019 by V.A. Guevara
 # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
@@ -120,8 +120,8 @@ class Player extends Body
 		# HUD setup (mass damping).
 		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, @damping,
 			(() -> @game.player.damping = not @game.player.damping), 
-			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#87CEEB'][0 + val])
-		@damping = JSON.parse(sessionStorage['muted'] ? 'false')
+			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#31D2F7'][0 + val])
+		@damping = JSON.parse(sessionStorage['muted'] ? 'true')
 		# HUD setup (pause).
 		@hud.add @switch = Game.text_switcher @game, cfg.width - 170, 14, @game.paused,
 			(() -> @game.paused = not @game.paused), 
@@ -407,7 +407,7 @@ class Game
 			targets: @welcome.first, scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 			onRepeat: => @welcome.heart.play() if @welcome.visible
 		# Welcome GUI: desc.
-		for hint, idx in ["「v0.03: Proto」", "「by Victoria A. Guevara」"]
+		for hint, idx in ["「v0.04: Proto」", "「by Victoria A. Guevara」"]
 			@welcome.add label = @scene.add.text((cfg.width/2)*[-1,1][idx], (cfg.height/2-20)*[-1,1][idx],
 				hint, {fontFamily:'Titillium Web', fontSize:20}).setInteractive({useHandCursor:true}).setOrigin(idx,0.5)
 			label.setStroke('#202020', 2)
