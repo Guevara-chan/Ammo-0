@@ -368,7 +368,7 @@ class Game
 			(()		-> @game.controller = ['mouse', 'keyboard'].find (x) => x isnt @game.controller), 
 			((val)	-> @setText "\n" + {mouse: "🖱️", keyboard: "⌨️"}[val])
 		@muter		= Game.text_switcher @, @app.config.width - 35, 14, @muted,
-			(() -> @game.muted = not @game.muted)
+			(()		-> @game.muted = not @game.muted),
 			((val)	-> @setText "\n" + ["🔊", "🔈"][0 + val])
 		@controller = localStorage['controller'] ? 'mouse'
 		@muted		= JSON.parse(localStorage['muted'] ? 'false')
