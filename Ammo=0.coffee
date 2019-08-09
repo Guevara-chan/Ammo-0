@@ -121,7 +121,7 @@ class Player extends Body
 		# HUD setup (mass damping).
 		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, @damping,
 			(() -> @game.player.damping = not @game.player.damping), 
-			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#00BFFF'][0 + val])
+			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#1E90FF'][0 + val])
 		# HUD setup (pause).
 		@hud.add @switch = Game.text_switcher @game, cfg.width - 170, 14, @game.paused,
 			(() -> @game.paused = not @game.paused), 
@@ -196,7 +196,8 @@ class Player extends Body
 				pad = @scene.input.gamepad.getPad(0)
 				[xshift, yshift] = if (axes = pad?.axes)? then [axes[0].getValue(), axes[1].getValue()] else [0, 0]
 				# Common buttons.
-				if pad?.B or any_pressed 'DOWN', 'S' then @damping = not @damping
+				if (pad?.B and pad?.B isnt @B_prev) or any_pressed 'DOWN', 'S'
+					@damping = not @damping
 				# Stccik/buttons switcher.
 				if xshift or yshift # Stick control.
 					@orient {x: @x + xshift, y: @y + yshift}; @propel(200)
@@ -204,6 +205,7 @@ class Player extends Body
 					if pad?.A		or any_down 'UP',	'W'	then @propel 200
 					if pad?.left	or any_down 'LEFT',	'A'	then @turn -200
 					if pad?.right 	or any_down 'RIGHT','D' then @turn 200
+				@B_prev = pad?._RCRight.pressed
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
