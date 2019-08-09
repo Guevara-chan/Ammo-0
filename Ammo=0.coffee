@@ -121,7 +121,7 @@ class Player extends Body
 		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, @damping,
 			(() -> @game.player.damping = not @game.player.damping), 
 			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#31D2F7'][0 + val])
-		@damping = JSON.parse(sessionStorage['muted'] ? 'true')
+		@damping = JSON.parse(sessionStorage['damping'] ? 'true')
 		# HUD setup (pause).
 		@hud.add @switch = Game.text_switcher @game, cfg.width - 170, 14, @game.paused,
 			(() -> @game.paused = not @game.paused), 
