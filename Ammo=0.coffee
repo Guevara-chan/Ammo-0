@@ -382,7 +382,7 @@ class Game
 		@welcome.heart = @scene.sound.add('heartbeat', {volume: 0.8})
 		@welcome.beat = @scene.tweens.add
 			targets: @welcome.first, scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
-			onRepeat: => @welcome.heart.play()
+			onRepeat: => @welcome.heart.play() if @welcome.visible
 		# Welcome GUI: desc.
 		for hint, idx in ["「v0.03: Proto」", "「by Victoria A. Guevara」"]
 			@welcome.add label = @scene.add.text((cfg.width/2)*[-1,1][idx], (cfg.height/2-20)*[-1,1][idx],
@@ -404,17 +404,30 @@ class Game
 			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)				
 			@scene.tweens.add
 				targets: lbl, x: [-300, 300][idx], yoyo: true, repeat: -1, duration: 5000, ease: 'Sine.easeInOut'
-		# Welcome GUI: exiting
-		exit_menu = () => unless @player? then @scene.cameras.main.fadeOut(1000); @player = {alive: false}
-		@space.setInteractive().once	'pointerdown',	exit_menu
-		@scene.input.gamepad.once		'down',			exit_menu
-		@scene.input.keyboard.once		'keydown',		exit_menu
+		# Finalization.
+		@menu()
+
+	cleanup: () ->
+		obj.destroy() for obj in @scene.children.list[0..]	when obj.type is 'Container' and obj isnt @welcome
+		snd.destroy() for snd in @scene.sound.sounds		when snd not in @track_list	 and snd isnt @welcome.heart
+
+	menu: () ->
+		# Init setup.
+		@cleanup()
+		@welcome.visible = true
+		# Exeiting preparations.
+		begin_game = () => unless @player? then @scene.cameras.main.fadeOut 1000, 0, 0, 0, (camera, progress) =>
+				if progress is 1
+					@player = {alive: false}
+					@welcome.visible = false
+		@space.setInteractive().once	'pointerdown',	begin_game
+		@scene.input.gamepad.once		'down',			begin_game
+		@scene.input.keyboard.once		'keydown',		begin_game
 		@mode = 'survival'; @zone = 'medium'
 
 	init: (@mode, @zone) ->
 		# Init setup.
-		obj.destroy() for obj in @scene.children.list[0..] when obj.type is 'Container'
-		snd.destroy() for snd in @scene.sound.sounds when snd not in @track_list
+		@cleanup()
 		@objects	= []
 		@enemies	= 0
 		@player		= new Player @, @app.config
@@ -450,8 +463,6 @@ class Game
 				y: (coord) => coord + height / 2 - @edge.v
 				x: (coord) => coord + width  / 2 - @edge.h
 		# Finalization.
-		@welcome?.destroy()
-		@welcome?.beat.remove()
 		@spawnlag		= 0
 		@space.rotation = 0
 		@scene.cameras.main.fadeIn(1000)
