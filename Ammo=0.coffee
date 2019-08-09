@@ -362,7 +362,7 @@ class Game
 		# Primary controls setup.
 		@scene.input.setPollAlways true
 		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D')
-		document.addEventListener 'keypress', (e) => if e.key is ' ' then @paused = not @paused
+		document.addEventListener 'keypress', (e) => if e.key is ' ' then @paused = not @paused		
 		# Additional main UI preparations.
 		@main_id = document.getElementById 'main_ui'
 		@main_id.style.visibility	= 'visible'
@@ -398,13 +398,17 @@ class Game
 			label.emit('pointerout')
 		# Welcome GUI: hints.
 		for idx in [0..1]
-			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), "[click anywhere]·".repeat(15), font =
-				fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
+			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), 
+				"[click anywhere]·[press any key]·".repeat(15), 
+					font = fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
 			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)				
 			@scene.tweens.add
 				targets: lbl, x: [-300, 300][idx], yoyo: true, repeat: -1, duration: 5000, ease: 'Sine.easeInOut'
-		@space.setInteractive().once 'pointerdown', () =>
-			@scene.cameras.main.fadeOut(1000); @player = {alive: false}
+		# Welcome GUI: exiting
+		exit_menu = () => @scene.cameras.main.fadeOut(1000); @player = {alive: false}
+		@space.setInteractive().once	'pointerdown',	exit_menu
+		@scene.input.gamepad.once		'down',			exit_menu
+		@scene.input.keyboard.once		'keydown',		exit_menu
 		# Game mode setup.
 		@mode = 'survival'; @zone = 'medium'
 
