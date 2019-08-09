@@ -10,6 +10,7 @@ class Body
 	tempo:	1.5
 	engine_off: 20
 	excl_zone:	700
+	mass_damping: off
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @game, x, y, trail_id) ->
@@ -73,6 +74,7 @@ class Body
 		@trail?.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
+		@model.body.setDrag(if @mass_damping then 0.95 else 1).useDamping = @mass_damping
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
@@ -92,7 +94,7 @@ class Player extends Body
 		super 'pship', game, x, y, 'jet'
 		@game.spacecrafts.add @model
 		@model.setScale 0.15, 0.15
-		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130).useDamping = true
+		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130)
 		@engine_off	+= 4
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
@@ -116,8 +118,12 @@ class Player extends Body
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
 		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
+		# HUD setup (mass damping).
+		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, @damping,
+			(() -> @game.player.damping = not @game.player.damping), 
+			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', 'cyan'][0 + val])
 		# HUD setup (pause).
-		@hud.add @switch = Game.text_switcher @game, cfg.width - 125, 14, @game.paused,
+		@hud.add @switch = Game.text_switcher @game, cfg.width - 170, 14, @game.paused,
 			(() -> @game.paused = not @game.paused), 
 			((val) -> @setText "\n" + ["❚❚", ""][0 + val])
 		@switch.setColor('gray')
@@ -128,7 +134,7 @@ class Player extends Body
 		# HUD setup (tweens).
 		@beat_sfx = @scene.sound.add 'heartbeat'
 		@hud.beat = @scene.tweens.add
-			targets: @hud.list[6], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
+			targets: @hud.list[7], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 			onRepeat: => @beat_sfx.play()
 		# Finlization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
@@ -173,7 +179,6 @@ class Player extends Body
 			@scene.input.activePointer.position.y
 		@target.first.rotation -= 0.025
 		# Controls.
-		@model.body.setDrag(if @mass_damping then 0.95 else 1)
 		@target.visible = switch @game.controller
 			when 'mouse'
 				@orient @target
@@ -192,7 +197,7 @@ class Player extends Body
 					if pad?.A		or any_down 'UP',	'W'	then @propel 200
 					if pad?.left	or any_down 'LEFT',	'A'	then @turn -200
 					if pad?.right 	or any_down 'RIGHT','D' then @turn 200
-					if pad?.B		or any_down 'DOWN',	'S' then @mass_damping = not @mass_damping
+					if pad?.B		or any_down 'DOWN',	'S' then @damping = not @damping
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
@@ -218,12 +223,14 @@ class Player extends Body
 			@hud.list[4].setColor('crimson').setText "●#{@hud.list[2].text[2..-2]}⋮☠#{trashed}"
 		else @hud.list[4].setColor('goldenrod').setText "🏆#{tformat(time//1000).join(':')}⋮☠#{trashed}"
 		# HUD update: ammo counter.
-		@hud.list[6].setText "Ammo:#{@ammo}"
+		@hud.list[7].setText "Ammo:#{@ammo}"
 		# Finalization.
 		@alive
 
 	# --Properties goes here.
+	@getter 'damping', () -> @mass_damping
 	@getter 'flytime', () -> new Date() - @departure
+	@setter 'damping', (val) -> @damper.sync @mass_damping = val
 # -------------------- #
 class Missile extends Body
 	fuel:	1000
@@ -343,6 +350,7 @@ class Game
 		@space	= @scene.add.tileSprite cfg.width / 2, cfg.height / 2, cfg.width*2, cfg.height*2, 'space'
 		@spacecrafts = @scene.physics.add.group()
 		@space.setScrollFactor(0)
+		#@space.setAlpha 0.5
 		# Particle setup.
 		@[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@steam.setDepth(1)
