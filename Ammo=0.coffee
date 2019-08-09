@@ -9,6 +9,7 @@ class Body
 	ammo:	0
 	tempo:	1.5
 	engine_off: 20
+	excl_zone:	700
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @game, x, y, trail_id) ->
@@ -81,7 +82,8 @@ class Body
 	@getter 'remoteness',	() -> Phaser.Math.Distance.Between(@game.player.x, @game.player.y, @x, @y)
 # -------------------- #
 class Player extends Body
-	trashed: 0
+	trashed:	0
+	excl_zone: 	1024
 	mass_damping: on
 
 	# --Methods goes here.
@@ -471,7 +473,6 @@ class Game
 		unless pos?
 			# Init setup.
 			spawn_area	= [@spawner.area...]
-			excl_zone	= 1024 
 			# Aux proc.
 			cut_rect = (array, left, top, vlen, hlen) =>
 				[left, top] = [Math.max(0, @spawner.proj.x left), Math.max(0, @spawner.proj.y top)]
@@ -482,7 +483,8 @@ class Game
 					arr[pos++] = 0 while pos < end
 				return 0
 			# Additional setup.
-			for obj in @spacecrafts.children.entries
+			for obj in @spacecrafts.children.entries when excl_zone = obj.self.excl_zone
+				console.log excl_zone
 				cut_rect spawn_area, obj.x // 1 - excl_zone // 2, obj.y // 1 - excl_zone // 2, excl_zone, excl_zone
 			while true
 				pos		= {y: @rnd 0, spawn_area.length-1}
