@@ -121,7 +121,7 @@ class Player extends Body
 		# HUD setup (mass damping).
 		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, @damping,
 			(() -> @game.player.damping = not @game.player.damping), 
-			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', 'cyan'][0 + val])
+			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#00BFFF'][0 + val])
 		# HUD setup (pause).
 		@hud.add @switch = Game.text_switcher @game, cfg.width - 170, 14, @game.paused,
 			(() -> @game.paused = not @game.paused), 
@@ -188,16 +188,22 @@ class Player extends Body
 				else 0x708090
 				true
 			when 'keyboard'
+				# Aux porcs.
 				any_down = (keylist...) => for key in keylist then return true if @game.controls[key].isDown
+				any_pressed = (keylist...) =>
+					for key in keylist then return true if Phaser.Input.Keyboard.JustDown @game.controls[key]
+				# Some init.
 				pad = @scene.input.gamepad.getPad(0)
 				[xshift, yshift] = if (axes = pad?.axes)? then [axes[0].getValue(), axes[1].getValue()] else [0, 0]
+				# common buttons.
+				if pad?.B or any_pressed 'DOWN', 'S' then @damping = not @damping
+				# Stccik/buttons switcher.
 				if xshift or yshift # Stick control.
 					@orient {x: @x + xshift, y: @y + yshift}; @propel(200)
 				else # Buttons control.
 					if pad?.A		or any_down 'UP',	'W'	then @propel 200
 					if pad?.left	or any_down 'LEFT',	'A'	then @turn -200
 					if pad?.right 	or any_down 'RIGHT','D' then @turn 200
-					if pad?.B		or any_down 'DOWN',	'S' then @damping = not @damping
 				false
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
@@ -372,7 +378,7 @@ class Game
 		# Primary controls setup.
 		@scene.input.setPollAlways true
 		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D')
-		document.addEventListener 'keypress', (e) => if e.key is ' ' then @paused = not @paused		
+		document.addEventListener 'keypress', (e) => if e.key is ' ' then 
 		# Additional main UI preparations.
 		@main_id = document.getElementById 'main_ui'
 		@main_id.style.visibility	= 'visible'
@@ -492,7 +498,6 @@ class Game
 				return 0
 			# Additional setup.
 			for obj in @spacecrafts.children.entries when excl_zone = obj.self.excl_zone
-				console.log excl_zone
 				cut_rect spawn_area, obj.x // 1 - excl_zone // 2, obj.y // 1 - excl_zone // 2, excl_zone, excl_zone
 			while true
 				pos		= {y: @rnd 0, spawn_area.length-1}
