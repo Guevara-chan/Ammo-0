@@ -380,8 +380,8 @@ class Game
 		# Primary controls setup.
 		@scene.input.setPollAlways true
 		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D')
-		document.addEventListener 'keypress', (e) => if e.key is ' ' then
-		setInterval (() =>
+		document.addEventListener 'keypress', (e) => if e.key is ' ' then @paused = not @paused
+		setInterval (() => unless @welcome.visible
 			btn = navigator.getGamepads()[0]?.buttons[9].touched
 			if btn and btn isnt @start_prev then @paused = not @paused
 			@start_prev = btn), 100
