@@ -458,7 +458,7 @@ class Game
 		{x, y, width, height}	= @scene.physics.world.bounds
 		spawn_row				= [x+@edge.h...width/2-@edge.h]
 		@spawner =
-			area: ({y: idx, row: [spawn_row...]} for idx in [y+@edge.v...height/2-@edge.v])
+			area: ({y: idx, row: new Int32Array spawn_row} for idx in [y+@edge.v...height/2-@edge.v])
 			proj:
 				y: (coord) => coord + height / 2 - @edge.v
 				x: (coord) => coord + width  / 2 - @edge.h
@@ -470,23 +470,27 @@ class Game
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
 			# Init setup.
-			spawn_area		= [@spawner.area...]
+			spawn_area	= [@spawner.area...]
+			excl_zone	= 1024 
 			# Aux proc.
 			cut_rect = (array, left, top, vlen, hlen) =>
 				[left, top] = [Math.max(0, @spawner.proj.x left), Math.max(0, @spawner.proj.y top)]
 				for idx in [top...Math.min(array.length-1, top + hlen)]
-					array[idx].row.splice left, vlen
-					#array[idx].row.fill -Infinity, left, left+vlen
+					pos = left
+					arr = array[idx].row
+					end = left+vlen
+					arr[pos++] = 0 while pos < end
+				return 0
 			# Additional setup.
-			cut_rect spawn_area, @player.x // 1 - 1024 / 2, @player.y // 1 - 768 / 2, 1024, 768
-			# Position picking.
-			spawn_area = spawn_area.filter (line) -> line.row.length
-			pos		= {y: @rnd 0, spawn_area.length-1}
-			pos.x	= (spawn_row = spawn_area[pos.y].row)[@rnd 0, spawn_row.length-1]
+			for obj in @spacecrafts.children.entries
+				cut_rect spawn_area, obj.x // 1 - excl_zone // 2, obj.y // 1 - excl_zone // 2, excl_zone, excl_zone
+			while true
+				pos		= {y: @rnd 0, spawn_area.length-1}
+				break if pos.x = (spawn_row = spawn_area[pos.y].row)[@rnd 0, spawn_row.length-1]
 			pos.y	= spawn_area[pos.y].y
 		# Actual spawning.
 		@spawnlag += Math.max 0, 500 - @player.trashed * 25
-		console.log pos
+		#console.log pos
 		new kind @, pos.x, pos.y
 
 	pause: () ->
