@@ -86,7 +86,6 @@ class Body
 class Player extends Body
 	trashed:	0
 	excl_zone: 	1024
-	mass_damping: on
 
 	# --Methods goes here.
 	constructor: (game, cfg, x = 0, y = 0) ->
@@ -121,7 +120,8 @@ class Player extends Body
 		# HUD setup (mass damping).
 		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, @damping,
 			(() -> @game.player.damping = not @game.player.damping), 
-			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#1E90FF'][0 + val])
+			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#87CEEB'][0 + val])
+		@damping = JSON.parse(sessionStorage['muted'] ? 'false')
 		# HUD setup (pause).
 		@hud.add @switch = Game.text_switcher @game, cfg.width - 170, 14, @game.paused,
 			(() -> @game.paused = not @game.paused), 
@@ -196,8 +196,7 @@ class Player extends Body
 				pad = @scene.input.gamepad.getPad(0)
 				[xshift, yshift] = if (axes = pad?.axes)? then [axes[0].getValue(), axes[1].getValue()] else [0, 0]
 				# Common buttons.
-				if (pad?.B and pad?.B isnt @B_prev) or any_pressed 'DOWN', 'S'
-					@damping = not @damping
+				@damping = not @damping if (pad?.B and pad?.B isnt @B_prev) or any_pressed 'DOWN', 'S'					
 				# Stccik/buttons switcher.
 				if xshift or yshift # Stick control.
 					@orient {x: @x + xshift, y: @y + yshift}; @propel(200)
@@ -238,7 +237,7 @@ class Player extends Body
 	# --Properties goes here.
 	@getter 'damping', () -> @mass_damping
 	@getter 'flytime', () -> new Date() - @departure
-	@setter 'damping', (val) -> @damper.sync @mass_damping = val
+	@setter 'damping', (val) -> @damper.sync sessionStorage['damping'] = @mass_damping = val
 # -------------------- #
 class Missile extends Body
 	fuel:	1000
