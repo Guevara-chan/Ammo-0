@@ -405,11 +405,10 @@ class Game
 			@scene.tweens.add
 				targets: lbl, x: [-300, 300][idx], yoyo: true, repeat: -1, duration: 5000, ease: 'Sine.easeInOut'
 		# Welcome GUI: exiting
-		exit_menu = () => @scene.cameras.main.fadeOut(1000); @player = {alive: false}
+		exit_menu = () => unless @player? then @scene.cameras.main.fadeOut(1000); @player = {alive: false}
 		@space.setInteractive().once	'pointerdown',	exit_menu
 		@scene.input.gamepad.once		'down',			exit_menu
 		@scene.input.keyboard.once		'keydown',		exit_menu
-		# Game mode setup.
 		@mode = 'survival'; @zone = 'medium'
 
 	init: (@mode, @zone) ->
