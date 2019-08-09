@@ -557,7 +557,8 @@ class Game
 
 	@text_button: (scene, x, y, click_handler, txt='') ->
 		btn=scene.add.text(x, y, txt,{fontSize: 35}).setScrollFactor(0).setInteractive().setDepth(2).setOrigin(0.5, 0.5)
-		btn.on('pointerover',	(-> @setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind btn)
+		btn.on('pointerover', (-> unless @game.on_mobile
+			@setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind btn)
 		.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind btn)
 		.on('pointerdown',	click_handler)
 		return btn
@@ -570,13 +571,14 @@ class Game
 		return btn
 
 	# --Properties goes here.
+	@getter 'on_mobile',	() -> navigator.userAgent.match(/Android/i) or navigator.userAgent.match /iPhone|iPad|iPod/i
 	@getter 'muted',		() -> @scene.sound.mute
 	@getter 'controller',	() -> @controller_
 	@getter 'paused',		() -> @paused_
 	@getter 'records_key',	() -> "#{@mode}:#{@zone}:best"
 	@getter 'records',		() -> JSON.parse(localStorage[@records_key] ? "[]")
-	@setter 'muted',		(val) -> @muter.sync localStorage['muted'] = @scene.sound.mute = val
-	@setter 'controller',	(val) -> @schemer.sync localStorage['controller'] = @controller_ = val
+	@setter 'muted',		(val) -> @muter.sync	localStorage['muted'] = @scene.sound.mute = val
+	@setter 'controller',	(val) -> @schemer.sync	localStorage['controller'] = @controller_ = val
 	@setter 'paused',		(val) -> @player?.switch.sync(val); if @paused_=val then @pause() else @unpause()
 #.}
 
