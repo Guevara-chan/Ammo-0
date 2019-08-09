@@ -195,7 +195,7 @@ class Player extends Body
 				# Some init.
 				pad = @scene.input.gamepad.getPad(0)
 				[xshift, yshift] = if (axes = pad?.axes)? then [axes[0].getValue(), axes[1].getValue()] else [0, 0]
-				# common buttons.
+				# Common buttons.
 				if pad?.B or any_pressed 'DOWN', 'S' then @damping = not @damping
 				# Stccik/buttons switcher.
 				if xshift or yshift # Stick control.
@@ -321,8 +321,10 @@ class Game
 
 	# --Methods goes here.
 	constructor: (width = 1024, height = 768) ->
+		# Init setup.
 		window.resizeTo Math.max(window.innerWidth, width+20), Math.max(window.innerHeight, height+45)
 		window.moveTo (screen.width-window.outerWidth) / 2, (screen.height-window.outerHeight) / 2
+		# Acutal game creation.		
 		@app = new Phaser.Game
 			type: Phaser.WEBGL, width: width, height: height, parent: 'main_ui'
 			scale: {mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_VERTICALLY}
@@ -378,7 +380,11 @@ class Game
 		# Primary controls setup.
 		@scene.input.setPollAlways true
 		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D')
-		document.addEventListener 'keypress', (e) => if e.key is ' ' then 
+		document.addEventListener 'keypress', (e) => if e.key is ' ' then
+		setInterval (() =>
+			btn = navigator.getGamepads()[0]?.buttons[9].touched
+			if btn and btn isnt @start_prev then @paused = not @paused
+			@start_prev = btn), 100
 		# Additional main UI preparations.
 		@main_id = document.getElementById 'main_ui'
 		@main_id.style.visibility	= 'visible'
