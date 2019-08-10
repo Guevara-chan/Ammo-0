@@ -102,8 +102,10 @@ class Player extends Body
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		@dampjet = @game.jet.createEmitter
-			speed: {max: 250, min: 150}, scale: { start: 0.02, end: 0 }, blendMode: 'ADD', lifespan: 250, on: false
-			angle: () => (@model.angle - Phaser.Math.Between 45, 135)
+			speed: {max: 250, min: 150}, scale: { start: 0.02, end: 0 }, blendMode: 'ADD', lifespan: 300, on: false
+			angle: () =>
+				delta = 45*@model.body.speed / @model.body.maxVelocity.x
+				(@model.angle - Phaser.Math.Between 90-delta, 90+delta)
 		# Crosshair
 		@target = @scene.add.container(0, 0).setDepth 3
 		@target.add [
