@@ -422,7 +422,7 @@ class Game
 		# Welcome GUI: hints.
 		for idx in [0..1]
 			@welcome.add lbl = @scene.add.text 0, [1,-1][idx]*(cfg.height/2-60), 
-				"[click anywhere]·[press any key]·".repeat(15), 
+				"[click anywhere]·[press any key]·".repeat(6), 
 					font = fontFamily: 'Titillium Web', fontSize: 35, color: 'coral'
 			lbl.setAlpha(0.9).setOrigin(0.5, 0.5).setShadow(0, 0, "lightsalmon", 7, true, true)				
 			@scene.tweens.add
