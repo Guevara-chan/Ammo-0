@@ -8,6 +8,7 @@ class Body
 	alive:	true
 	ammo:	0
 	tempo:	1.5
+	thrust: 200
 	engine_off: 20
 	excl_zone:	700
 	mass_damping: off
@@ -46,7 +47,7 @@ class Body
 		if Math.abs(delta) > 3.14 then delta = -delta
 		@turn -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
 
-	propel: (impulse) ->
+	propel: (impulse = @thrust) ->
 		@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
 		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse * @tempo, @acceleration)
 		@trail?.start()
@@ -148,9 +149,6 @@ class Player extends Body
 		# Finlization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@departure = new Date()
-
-	propel: (impulse = 200) ->
-		super 200
 
 	explode: () ->
 		super()
@@ -274,7 +272,7 @@ class Missile extends Body
 		super()
 		if @fuel-- > 0
 			@orient @target.model
-			@propel(200)
+			@propel()
 			@fused = true if not @fused and not @scene.physics.world.overlap(@model, @emitter.model)
 		else if @fuel < -30 then @explode()
 		if @alive and @fused then @scene.physics.world.overlap @model, @game.spacecrafts, (rkt, tgt) ->
