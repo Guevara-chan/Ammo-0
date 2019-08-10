@@ -23,7 +23,8 @@ class Body
 		# Trail setup.
 		if trail_id?
 			@trail = @game[trail_id].createEmitter cfg =
-				speed: 100, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false, angle: () => @model.angle + 90
+				speed: {min: 90, max: 100}, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false
+				angle: () => @model.angle + 90
 			.startFollow @model, true, 0.05, 0.05
 
 	turn: (speed) ->
@@ -364,10 +365,10 @@ class Game
 		@[matter] = @scene.add.particles(matter) for matter in ['jet', 'explode', 'steam']
 		@steam.setDepth(1)
 		# Switchers.
-		@schemer	= Game.text_switcher @, @app.config.width - 80, 14, false,
+		@schemer	= Game.text_switcher @, @app.config.width - 80, 14, "🖱️⌨️",
 			(()		-> @game.controller = ['mouse', 'keyboard'].find (x) => x isnt @game.controller), 
 			((val)	-> @setText "\n" + {mouse: "🖱️", keyboard: "⌨️"}[val])
-		@muter		= Game.text_switcher @, @app.config.width - 35, 14, false,
+		@muter		= Game.text_switcher @, @app.config.width - 35, 14, "🔊🔈",
 			(()		-> @game.muted = not @game.muted),
 			((val)	-> @setText "\n" + ["🔊", "🔈"][0 + val])
 		@controller = localStorage['controller'] ? 'mouse'
