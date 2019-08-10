@@ -11,7 +11,9 @@ Initially made in ~3 days using [Phaser3](https://phaser.io/phaser3), project is
 
 # ⋮Compatibility⋮
 __Ammo:0__ was best tested with _Chrome 76_ and [Electron](https://electronjs.org/), which is used to develop it.  
-Reported as being compeletely playable with _Mozilla Firefox_, and (little worse) on _Edge_ and mobile _Chrome_.  
+_Mozilla Firefox_: works with some particle animation problems and overall lesser framerate.  
+_Edge_: got problems with some UI elements and serious lags.  
+Mobile _Chrome_: works except minor UI disambiguations.  
 _No __iOs__ support was achieved so far._
 
 # ⋮Brief spampling of weaponless warfare⋮
