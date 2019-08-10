@@ -23,8 +23,9 @@ class Body
 		# Trail setup.
 		if trail_id?
 			@trail = @game[trail_id].createEmitter cfg =
-				speed: {min: 90, max: 100}, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false
+				speed: {max: 90, min: 100}, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false
 				angle: () => @model.angle + 90
+			.setFrequency(0, 2)
 			.startFollow @model, true, 0.05, 0.05
 
 	turn: (speed) ->
