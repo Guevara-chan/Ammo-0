@@ -102,7 +102,7 @@ class Player extends Body
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		@dampjet = @game.jet.createEmitter
-			speed: {max: 150, min: 50}, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false
+			speed: {max: 200, min: 100}, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', lifespan: 500, on: false
 			angle: () => (@model.angle - Phaser.Math.Between 45, 135)
 		# Crosshair
 		@target = @scene.add.container(0, 0).setDepth 3
@@ -216,7 +216,7 @@ class Player extends Body
 				@B_prev = pad?._RCRight.pressed
 				false
 		# Mass damper
-		@dampjet.explode(@model.body.speed / 4, @x, @y) if @damping and @model.body.speed > 100 and not @thrusters
+		@dampjet.explode(@model.body.speed / 7, @x, @y) if @damping and @model.body.speed > 20 and not @thrusters
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
