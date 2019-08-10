@@ -555,18 +555,18 @@ class Game
 				when 'survival' # Infinite respawining.
 					@init(@mode, @zone)
 
-	@text_button: (scene, x, y, click_handler, txt='') ->
-		btn=scene.add.text(x, y, txt,{fontSize: 35}).setScrollFactor(0).setInteractive().setDepth(2).setOrigin(0.5, 0.5)
+	@text_button: (game, x, y, click_handler, txt='') ->
+		btn=game.scene.add.text(x,y,txt,{fontSize:35}).setScrollFactor(0).setInteractive().setDepth(2).setOrigin 0.5,0.5
 		btn.on('pointerover', (-> unless @game.on_mobile
 			@setShadow(0, 0, "darkcyan", 7, true, true).setStroke('cyan', 2).y-=1).bind btn)
 		.on('pointerout',	(-> @setShadow(1, 1, "#330000", 1).setStroke('', 0).y+=1).bind btn)
 		.on('pointerdown',	click_handler)
+		.game = game
 		return btn
 
 	@text_switcher: (game, x, y, init_val, click_handler, switch_handler) ->
-		btn				= Game.text_button game.scene, x, y, click_handler
+		btn				= Game.text_button game, x, y, click_handler
 		btn.sync		= switch_handler?.bind btn
-		btn.game		= game
 		btn.sync(init_val)
 		return btn
 
