@@ -50,6 +50,7 @@ class Body
 		@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
 		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse * @tempo, @acceleration)
 		@trail?.start()
+		@thrusters = on
 
 	shoot: (ammo, target) ->
 		if --@ammo > 0 then @game.pending.push new ammo @game, @, target
@@ -77,6 +78,7 @@ class Body
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
 		@model.body.setDrag(if @mass_damping then 0.95 else 1).useDamping = @mass_damping
+		@thrusters = off
 
 	# --Properties goes here.
 	@getter 'x',			() -> @model.x
@@ -99,6 +101,9 @@ class Player extends Body
 		@engine_off	+= 4
 		# Custom jet trail.
 		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
+		@dampjet = @game.jet.createEmitter
+			speed: {max: 150, min: 50}, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false
+			angle: () => (@model.angle - Phaser.Math.Between 45, 135)
 		# Crosshair
 		@target = @scene.add.container(0, 0).setDepth 3
 		@target.add [
@@ -141,6 +146,9 @@ class Player extends Body
 		# Finlization.
 		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
 		@departure = new Date()
+
+	propel: (impulse = 200) ->
+		super 200
 
 	explode: () ->
 		super()
@@ -185,7 +193,7 @@ class Player extends Body
 			when 'mouse'
 				@orient @target
 				@target.first.setTint if @scene.input.activePointer.isDown
-					@propel(200)
+					@propel()
 					0x00FFFF
 				else 0x708090
 				true
@@ -200,14 +208,15 @@ class Player extends Body
 				# Common buttons.
 				@damping = not @damping if (pad?.B and pad?.B isnt @B_prev) or any_pressed 'DOWN', 'S'					
 				# Stccik/buttons switcher.
-				if xshift or yshift # Stick control.
-					@orient {x: @x + xshift, y: @y + yshift}; @propel(200)
+				if xshift or yshift then @orient {x: @x + xshift, y: @y + yshift}; @propel() # Stick control.
 				else # Buttons control.
-					if pad?.A		or any_down 'UP',	'W'	then @propel 200
+					if pad?.A		or any_down 'UP',	'W'	then @propel()
 					if pad?.left	or any_down 'LEFT',	'A'	then @turn -200
 					if pad?.right 	or any_down 'RIGHT','D' then @turn 200
 				@B_prev = pad?._RCRight.pressed
 				false
+		# Mass damper
+		@dampjet.explode(@model.body.speed / 4, @x, @y) if @damping and @model.body.speed > 100 and not @thrusters
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
