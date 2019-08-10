@@ -14,7 +14,7 @@ __Ammo:0__ was best tested with _Chrome 76_ and [Electron](https://electronjs.or
 🐞 _Mozilla Firefox_: works with some particle animation problems and overall lesser framerate.  
 🐞 _Edge_: got problems with some UI elements and serious lags.  
 🐞 Mobile _Chrome_: works except minor UI disambiguations.  
-_No __iOs__ support was achieved so far._
+❌ _No __iOs__ support was achieved so far._
 
 # ⋮Brief spampling of weaponless warfare⋮
 ![image](https://user-images.githubusercontent.com/8768470/62809552-ee5ed880-bb03-11e9-95ca-166fe09b607a.png)
