@@ -249,7 +249,7 @@ class Missile extends Body
 	constructor: (game, emitter, @target) ->
 		super 'rocket', game, emitter.x, emitter.y, 'jet'
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
-		@model.body.setMaxVelocity(110 * @tempo).setSize(100, 300).setOffset(-50, -150)#.setDrag(1).useDamping = true
+		@model.body.setMaxVelocity(110 * @tempo).setSize(100, 300).setOffset(-50, -150)
 		@emitter	= emitter
 		@engine_off	-= 1
 
@@ -286,18 +286,11 @@ class MissileBase extends Body
 		@reload	= 0
 		# Missile silo
 		@silo	= @game.steam.createEmitter cfg =
-			speed: { min: 50,		max: 100 }
-			scale: { start: 0.1,	end: 0.05 }
-			alpha: { start: 1,		end: 0 }
-			frequency: -1
-			blendMode: 'ADD'
+			speed: {min: 50, max: 100}, scale: {start: 0.1,	end: 0.05},	alpha: {start: 1, end: 0 }
+			frequency: -1, blendMode: 'ADD'
 		# Appearing.
 		@teleport = @scene.tweens.add cfg =
-			targets: @model,
-			scaleX: 0.2
-			alpha: 1 # { start: 0, end: 1}
-			duration: 1000,
-			ease: 'Sine.easeInOut'
+			targets: @model, scaleX: 0.2, alpha: 1, duration: 1000,	ease: 'Sine.easeInOut'
 
 	explode: () ->
 		super 75
