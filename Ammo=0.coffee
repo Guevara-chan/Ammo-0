@@ -120,7 +120,7 @@ class Player extends Body
 		.add @scene.add.text(cfg.width / 2, cfg.height-20, '', hud_font).setOrigin(0.5, 1)
 		lbl.setShadow(0, 0, "black", 7, true, true) for lbl in @hud.list
 		# HUD setup (mass damping).
-		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, @damping,
+		@hud.add @damper = Game.text_switcher @game, cfg.width - 125, 12, "⥤⇌",
 			(() -> @game.player.damping = not @game.player.damping), 
 			((val) -> @setText("\n" + ["⥤", "⇌"][0 + val]).setColor ['slategray', '#31D2F7'][0 + val])
 		@damping = JSON.parse(sessionStorage['damping'] ? 'true')
