@@ -53,6 +53,10 @@ class Body
 		@trail?.start()
 		@thrusters = on
 
+	strafe: (to_right = false, impulse = @thrust) ->
+		@scene.physics.velocityFromRotation(@model.rotation-3.14/2*[2,0][0+to_right], impulse*@tempo, @acceleration)
+		@trail?.start()
+
 	shoot: (ammo, target) ->
 		if --@ammo > 0 then @game.pending.push new ammo @game, @, target
 
@@ -210,9 +214,13 @@ class Player extends Body
 				# Stccik/buttons switcher.
 				if xshift or yshift then @orient {x: @x + xshift, y: @y + yshift}; @propel() # Stick control.
 				else # Buttons control.
-					if pad?.A		or any_down 'UP',	'W'	then @propel()
+					# Turning.
 					if pad?.left	or any_down 'LEFT',	'A'	then @turn -200
 					if pad?.right 	or any_down 'RIGHT','D' then @turn 200
+					# Directional movement.
+					if any_down 'Q'							then @strafe()
+					else if any_down 'E'					then @strafe(true)
+					else if pad?.A or any_down 'UP',	'W'	then @propel()
 				@B_prev = pad?._RCRight.pressed
 				false
 		# Mass damper
@@ -384,7 +392,7 @@ class Game
 		random()
 		# Primary controls setup.
 		@scene.input.setPollAlways true
-		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D')
+		@controls = @scene.input.keyboard.addKeys('UP,LEFT,RIGHT,DOWN,W,S,A,D,Q,E')
 		document.addEventListener 'keypress', (e) => if e.key is ' ' then @paused = not @paused
 		setInterval (() => unless @welcome.visible
 			btn = navigator.getGamepads()[0]?.buttons[9].touched
