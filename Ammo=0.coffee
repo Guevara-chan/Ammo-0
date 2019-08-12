@@ -23,11 +23,18 @@ class Body
 		@game.objects.push @
 		# Trail setup.
 		if trail_id?
-			@trail = @game[trail_id].createEmitter cfg =
-				speed: {max: 90, min: 100}, scale: { start: 0.02, end: 0 },	blendMode: 'ADD', on: false
-				angle: () => @model.angle + 90
-			.setFrequency(0, 2)
-			.startFollow @model, true, 0.05, 0.05
+			engine_template = {blendMode: 'ADD', on: false}
+			@engine = 
+				main: @game[trail_id].createEmitter Object.assign engine_template,
+					speed: {max: 90, min: 100}, scale: { start: 0.02, end: 0 },	
+					angle: () => @model.angle + 90
+				deltaL: @game[trail_id].createEmitter Object.assign engine_template,
+					speed: {max: 250, min: 150}, scale: { start: 0.025, end: 0 }, lifespan: 300,
+					angle: () => @model.angle - 45
+				deltaR: @game[trail_id].createEmitter Object.assign engine_template,
+					speed: {max: 250, min: 150}, scale: { start: 0.025, end: 0 }, lifespan: 300,
+					angle: () => @model.angle - 135
+			@engine[thruster].startFollow(@model, true, 0.05, 0.05) for thruster of @engine
 
 	turn: (speed) ->
 		@model.body.setAngularVelocity speed
@@ -47,15 +54,18 @@ class Body
 		if Math.abs(delta) > 3.14 then delta = -delta
 		@turn -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
 
-	propel: (impulse = @thrust) ->
-		@model.body.setVelocityX(@model.body.velocity.x *0.98).setVelocityY(@model.body.velocity.y * 0.98)
-		@scene.physics.velocityFromRotation(@model.rotation - 3.14 / 2, impulse * @tempo, @acceleration)
-		@trail?.start()
+	accel: (angle = @model.rotation - 3.14 / 2, impulse = @thrust) ->
+		@model.body.setVelocityX(@model.body.velocity.x * 0.98).setVelocityY(@model.body.velocity.y * 0.98)
+		@scene.physics.velocityFromRotation angle, impulse * @tempo, @acceleration
+		@engine?.main.start()
 		@thrusters = on
 
+	propel: (impulse = @thrust) ->
+		@accel()
+
 	strafe: (to_right = false, impulse = @thrust) ->
-		@scene.physics.velocityFromRotation(@model.rotation-3.14/2*[2,0][0+to_right], impulse*@tempo, @acceleration)
-		@trail?.start()
+		@accel @model.rotation-3.14*[0.75,0.25][0+to_right]
+		@engine[if to_right then "deltaR" else "deltaL"].explode(40, @x, @y)
 
 	shoot: (ammo, target) ->
 		if --@ammo > 0 then @game.pending.push new ammo @game, @, target
@@ -66,20 +76,20 @@ class Body
 	explode: (magnitude = 50) ->
 		@explosion  = @game.explode.createEmitter
 			speed: { min: magnitude * 0.9, max: magnitude * 1.1 }, scale: { start: 0.1, end: 0 }, blendMode: 'ADD'
-		.explode(magnitude * 2, @x, @y)
-		@model.first.setTintFill(0)
+		.explode magnitude * 2, @x, @y
+		@model.first.setTintFill 0
 		@model.body.destroy()
 		@scene.tweens.add
 			targets: @model, alpha: 0, ease: 'Power1', duration: 200, onComplete: () => @model.destroy()
-		@trail?.stopFollow().stop()
+		@engine[thruster].stopFollow().stop() for thruster of @engine
 		@requiem?.play @volume()
 		@alive = false
 
 	update: () ->
 		@scene.physics.world.wrap @model, 0
-		@trail?.stop()
-		@trail?.followOffset.x = -Math.cos(@model.rotation-3.14/2) * @engine_off
-		@trail?.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
+		@engine?.main.stop()
+		@engine?.main.followOffset.x = -Math.cos(@model.rotation-3.14/2) * @engine_off
+		@engine?.main.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
 		@model.body.setDrag(if @mass_damping then 0.95 else 1).useDamping = @mass_damping
@@ -90,7 +100,7 @@ class Body
 	@getter 'y',			() -> @model.y
 	@getter 'pos',			() -> @model.position
 	@getter 'acceleration', () -> @model.body.acceleration
-	@getter 'remoteness',	() -> Phaser.Math.Distance.Between(@game.player.x, @game.player.y, @x, @y)
+	@getter 'remoteness',	() -> Phaser.Math.Distance.Between @game.player.x, @game.player.y, @x, @y
 # -------------------- #
 class Player extends Body
 	trashed:	0
@@ -105,12 +115,7 @@ class Player extends Body
 		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130)
 		@engine_off	+= 4
 		# Custom jet trail.
-		@trail.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
-		@dampjet = @game.jet.createEmitter
-			speed: {max: 250, min: 150}, scale: { start: 0.025, end: 0 }, blendMode: 'ADD', lifespan: 300, on: false
-			angle: () =>
-				delta = 45*@model.body.speed / @model.body.maxVelocity.x
-				(@model.angle - Phaser.Math.Between 90-delta, 90+delta)
+		@engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		# Crosshair
 		@target = @scene.add.container(0, 0).setDepth 3
 		@target.add [
@@ -218,13 +223,15 @@ class Player extends Body
 					if pad?.left	or any_down 'LEFT',	'A'	then @turn -200
 					if pad?.right 	or any_down 'RIGHT','D' then @turn 200
 					# Directional movement.
-					if any_down 'Q'							then @strafe()
-					else if any_down 'E'					then @strafe(true)
-					else if pad?.A or any_down 'UP',	'W'	then @propel()
+					if		pad?.L1 or any_down 'Q'			then @strafe()
+					else if pad?.R1	or any_down 'E'			then @strafe(true)
+					else if pad?.A	or any_down 'UP', 'W'	then @propel()
 				@B_prev = pad?._RCRight.pressed
 				false
 		# Mass damper
-		@dampjet.explode(@model.body.speed / 7, @x, @y) if @damping and @model.body.speed > 20 and not @thrusters
+		if @damping and @model.body.speed > 20 and not @thrusters
+			@engine.deltaL.explode(intensity = @model.body.speed / 7, @x, @y)
+			@engine.deltaR.explode(intensity, @x, @y)
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
