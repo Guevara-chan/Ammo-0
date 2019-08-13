@@ -65,7 +65,7 @@ class Body
 
 	strafe: (to_right = false, impulse = @thrust) ->
 		@accel @model.rotation-3.14*[0.75,0.25][0+to_right]
-		@engine[if to_right then "deltaR" else "deltaL"].explode(40, @x, @y)
+		@engine[if to_right then "deltaR" else "deltaL"].explode(2, @x, @y)
 
 	shoot: (ammo, target) ->
 		if --@ammo > 0 then @game.pending.push new ammo @game, @, target
@@ -114,8 +114,6 @@ class Player extends Body
 		@model.setScale 0.15, 0.15
 		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130)
 		@engine_off	+= 4
-		# Custom jet trail.
-		@engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		# Crosshair
 		@target = @scene.add.container(0, 0).setDepth 3
 		@target.add [
@@ -230,8 +228,10 @@ class Player extends Body
 				false
 		# Mass damper
 		if @damping and @model.body.speed > 20 and not @thrusters
-			@engine.deltaL.explode(intensity = @model.body.speed / 7, @x, @y)
-			@engine.deltaR.explode(intensity, @x, @y)
+			@engine.deltaL.explode(intensity = @model.body.speed / 8)
+			@engine.deltaR.explode(intensity)
+			@engine.main.explode(intensity)
+		else @engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
