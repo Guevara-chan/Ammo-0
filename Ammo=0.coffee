@@ -9,7 +9,8 @@ class Body
 	ammo:	0
 	tempo:	1.5
 	thrust: 200
-	engine_off: 20
+	mengine_off: 20
+	dengine_off: 5
 	excl_zone:	700
 	mass_damping: off
 
@@ -88,8 +89,13 @@ class Body
 	update: () ->
 		@scene.physics.world.wrap @model, 0
 		@engine?.main.stop()
-		@engine?.main.followOffset.x = -Math.cos(@model.rotation-3.14/2) * @engine_off
-		@engine?.main.followOffset.y = -Math.sin(@model.rotation-3.14/2) * @engine_off
+		[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
+		@engine?.main.followOffset.x	= -cos	* @mengine_off
+		@engine?.main.followOffset.y	= -sin	* @mengine_off
+		@engine?.deltaL.followOffset.x	= -cos	* @dengine_off
+		@engine?.deltaL.followOffset.y	= sin	* @dengine_off
+		@engine?.deltaR.followOffset.x	= cos	* @dengine_off
+		@engine?.deltaR.followOffset.y	= sin	* @dengine_off
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
 		@model.body.setDrag(if @mass_damping then 0.95 else 1).useDamping = @mass_damping
@@ -113,7 +119,7 @@ class Player extends Body
 		@game.spacecrafts.add @model
 		@model.setScale 0.15, 0.15
 		@model.body.setMaxVelocity(100 * @tempo).setOffset(-65, -45).setSize(130, 130)
-		@engine_off	+= 4
+		@mengine_off += 4
 		# Crosshair
 		@target = @scene.add.container(0, 0).setDepth 3
 		@target.add [
@@ -275,7 +281,7 @@ class Missile extends Body
 		@model.setScale(0.15, 0.05).rotation = @scene.physics.accelerateToObject(@model, @target.model, 0) + 3.14 / 2
 		@model.body.setMaxVelocity(110 * @tempo).setSize(100, 300).setOffset(-50, -150)
 		@emitter	= emitter
-		@engine_off	-= 1
+		@mengine_off -= 1
 
 	explode: () ->
 		super()
