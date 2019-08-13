@@ -10,7 +10,7 @@ class Body
 	tempo:	1.5
 	thrust: 200
 	mengine_off: 20
-	dengine_off: 5
+	dengine_off: 7
 	excl_zone:	700
 	mass_damping: off
 
@@ -92,9 +92,9 @@ class Body
 		[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
 		@engine?.main.followOffset.x	= -cos	* @mengine_off
 		@engine?.main.followOffset.y	= -sin	* @mengine_off
-		@engine?.deltaL.followOffset.x	= -cos	* @dengine_off
+		@engine?.deltaL.followOffset.x	= cos	* @dengine_off
 		@engine?.deltaL.followOffset.y	= sin	* @dengine_off
-		@engine?.deltaR.followOffset.x	= cos	* @dengine_off
+		@engine?.deltaR.followOffset.x	= -cos	* @dengine_off
 		@engine?.deltaR.followOffset.y	= sin	* @dengine_off
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
