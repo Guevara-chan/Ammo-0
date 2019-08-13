@@ -30,10 +30,10 @@ class Body
 					speed: {max: 90, min: 100}, scale: { start: 0.02, end: 0 },	
 					angle: () => @model.angle + 90
 				deltaL: @game[trail_id].createEmitter Object.assign engine_template,
-					speed: {max: 250, min: 150}, scale: { start: 0.025, end: 0 }, lifespan: 300,
+					speed: {max: 250, min: 150}, scale: { start: 0.0225, end: 0 }, lifespan: 300,
 					angle: () => @model.angle - 45
 				deltaR: @game[trail_id].createEmitter Object.assign engine_template,
-					speed: {max: 250, min: 150}, scale: { start: 0.025, end: 0 }, lifespan: 300,
+					speed: {max: 250, min: 150}, scale: { start: 0.0225, end: 0 }, lifespan: 300,
 					angle: () => @model.angle - 135
 			@engine[thruster].startFollow(@model, true, 0.05, 0.05) for thruster of @engine
 
@@ -92,7 +92,7 @@ class Body
 		[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
 		@engine?.main.followOffset.x	= -cos	* @mengine_off
 		@engine?.main.followOffset.y	= -sin	* @mengine_off
-		@engine?.deltaL.followOffset.x	= cos	* @dengine_off
+		@engine?.deltaL.followOffset.x	= -cos	* @dengine_off
 		@engine?.deltaL.followOffset.y	= sin	* @dengine_off
 		@engine?.deltaR.followOffset.x	= -cos	* @dengine_off
 		@engine?.deltaR.followOffset.y	= sin	* @dengine_off
