@@ -66,7 +66,7 @@ class Body
 
 	strafe: (to_right = false, impulse = @thrust) ->
 		@accel @model.rotation-3.14*[0.75,0.25][0+to_right]
-		@engine[if to_right then "deltaR" else "deltaL"].explode(3, @x, @y)
+		@engine[if to_right then "deltaR" else "deltaL"].explode(3)
 
 	shoot: (ammo, target) ->
 		if --@ammo > 0 then @game.pending.push new ammo @game, @, target
