@@ -139,7 +139,6 @@ class Player extends Body
 		@hud = @scene.add.container 0, 0, (for color in ['gray', '#C46210']
 			lbl = @scene.add.text(15, 15, '', hud_font).setColor color)
 		.setScrollFactor(0).setDepth(2)
-		@hud.moveUp @hud.last
 		# HUD setup (timer, threat, shadows, record).
 		.add @scene.add.text(cfg.width / 2, 15, '', hud_font).setOrigin(0.5, 0)
 		.add @scene.add.text(15, cfg.height-20, '', hud_font).setOrigin(0, 1)
