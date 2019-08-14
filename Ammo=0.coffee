@@ -92,9 +92,9 @@ class Body
 		[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
 		@engine?.main.followOffset.x	= -cos	* @mengine_off
 		@engine?.main.followOffset.y	= -sin	* @mengine_off
-		@engine?.deltaL.followOffset.x	= -cos	* @dengine_off
+		@engine?.deltaL.followOffset.x	= cos	* @dengine_off
 		@engine?.deltaL.followOffset.y	= sin	* @dengine_off
-		@engine?.deltaR.followOffset.x	= -cos	* @dengine_off
+		@engine?.deltaR.followOffset.x	= cos	* @dengine_off
 		@engine?.deltaR.followOffset.y	= sin	* @dengine_off
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
@@ -110,7 +110,7 @@ class Body
 # -------------------- #
 class Player extends Body
 	trashed:	0
-	excl_zone: 	1024
+	excl_zone: 	1050
 
 	# --Methods goes here.
 	constructor: (game, cfg, x = 0, y = 0) ->
@@ -234,9 +234,9 @@ class Player extends Body
 				false
 		# Mass damper
 		if @damping and @model.body.speed > 20 and not @thrusters
-			@engine.deltaL.explode(intensity = @model.body.speed / 8)
-			@engine.deltaR.explode(intensity)
-			@engine.main.explode(intensity)
+			@engine.deltaL.explode	intensity = @model.body.speed / 7
+			@engine.deltaR.explode	intensity
+			@engine.main.explode	@model.body.speed / 20
 		else @engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
