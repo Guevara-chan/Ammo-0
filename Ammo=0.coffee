@@ -234,7 +234,7 @@ class Player extends Body
 				false
 		# Mass damper
 		if @damping and @model.body.speed > 20 and not @thrusters
-			@engine.deltaL.explode	intensity = @model.body.speed / 7
+			@engine.deltaL.explode	intensity = @model.body.speed / 5 #/ 7
 			@engine.deltaR.explode	intensity
 			@engine.main.explode	@model.body.speed / 20
 		else @engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
