@@ -87,7 +87,9 @@ class Body
 		@alive = false
 
 	update: () ->
+		# Physics handler.
 		@scene.physics.world.wrap @model, 0
+		# Engines control
 		@engine?.main.stop()
 		[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
 		@engine?.main.followOffset.x	= -cos	* @mengine_off
@@ -96,9 +98,11 @@ class Body
 		@engine?.deltaL.followOffset.y	= sin	* @dengine_off
 		@engine?.deltaR.followOffset.x	= cos	* @dengine_off
 		@engine?.deltaR.followOffset.y	= sin	* @dengine_off
+		# Deacceleration.
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
 		@model.body.setDrag(if @mass_damping then 0.95 else 1).useDamping = @mass_damping
+		# Finalzation.
 		@thrusters = off
 
 	# --Properties goes here.
@@ -234,7 +238,7 @@ class Player extends Body
 				false
 		# Mass damper
 		if @damping and @model.body.speed > 20 and not @thrusters
-			@engine.deltaL.explode	intensity = @model.body.speed / 5 #/ 7
+			@engine.deltaL.explode	intensity = @model.body.speed / 5
 			@engine.deltaR.explode	intensity
 			@engine.main.explode	@model.body.speed / 20
 		else @engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
@@ -470,7 +474,8 @@ class Game
 					@welcome.visible = false
 		@space.setInteractive().once	'pointerdown',	begin_game
 		@scene.input.gamepad.once		'down',			begin_game
-		@scene.input.keyboard.once		'keydown',		begin_game
+		@scene.input.keyboard.once		'keydown',		key_check = (input) =>
+			if input.code then begin_game() else @scene.input.keyboard.once	'keydown', key_check
 		@mode = 'survival'; @zone = 'medium'
 
 	init: (@mode, @zone) ->
