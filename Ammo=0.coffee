@@ -9,10 +9,11 @@ class Body
 	ammo:	0
 	tempo:	1.5
 	thrust: 200
-	mengine_off: 20
-	dengine_off: 7
-	excl_zone:	700
-	mass_damping: off
+	mengine_off:	20
+	dengine_off:	7
+	excl_zone:		700
+	turbofan:		0
+	mass_damping: 	off
 
 	# --Methods goes here.
 	constructor: (@sprite_id, @game, x, y, trail_id) ->
@@ -28,13 +29,13 @@ class Body
 			@engine = 
 				main: @game[trail_id].createEmitter Object.assign engine_template,
 					speed: {max: 90, min: 100}, scale: { start: 0.02, end: 0 },	
-					angle: () => @model.angle + 90
+					angle: () => @model.angle + 90 + Phaser.Math.Between -@turbofan, @turbofan
 				deltaL: @game[trail_id].createEmitter Object.assign engine_template,
 					speed: {max: 250, min: 150}, scale: { start: 0.0225, end: 0 }, lifespan: 300,
-					angle: () => @model.angle - 45
+					angle: () => @model.angle - 45 + Phaser.Math.Between -@turbofan, @turbofan
 				deltaR: @game[trail_id].createEmitter Object.assign engine_template,
 					speed: {max: 250, min: 150}, scale: { start: 0.0225, end: 0 }, lifespan: 300,
-					angle: () => @model.angle - 135
+					angle: () => @model.angle - 135 + Phaser.Math.Between -@turbofan, @turbofan
 			@engine[thruster].startFollow(@model, true, 0.05, 0.05) for thruster of @engine
 
 	turn: (speed) ->
@@ -237,11 +238,14 @@ class Player extends Body
 				@B_prev = pad?._RCRight.pressed
 				false
 		# Mass damper
-		if @damping and @model.body.speed > 20 and not @thrusters
+		@turbofan = if @damping and @model.body.speed > 20 and not @thrusters
 			@engine.deltaL.explode	intensity = @model.body.speed / 5
 			@engine.deltaR.explode	intensity
 			@engine.main.explode	@model.body.speed / 20
-		else @engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
+			20
+		else 
+			@engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
+			0
 		# HUD update: trash counter.
 		@hud.first.setColor (if 0 < @trash_anim?.progress < 1 then 'crimson' else @hud.list[1].scaleY = 1; 'gray')
 		for lbl, idx in @hud.list[0..1]
