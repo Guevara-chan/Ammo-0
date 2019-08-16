@@ -242,7 +242,7 @@ class Player extends Body
 			@engine.deltaL.explode	intensity = @model.body.speed / 5
 			@engine.deltaR.explode	intensity
 			@engine.main.explode	@model.body.speed / 20
-			20
+			20 * @model.body.speed / @model.body.maxVelocity.x
 		else 
 			@engine.main.setSpeed({ min: 50, max: -50}).setFrequency(0, 2).setScale({ start: 0.03, end: 0 })
 			0
@@ -310,13 +310,14 @@ class Missile extends Body
 		@alive
 # -------------------- #
 class MissileBase extends Body
-	ammo: Infinity
+	ammo:	Infinity
+	ready:	false
 
 	# --Methods goes here.
 	constructor: (game, x, y) ->
 		# Model setup
 		super 'mbase', game, x, y
-		@model.setScale(0.0, 0.2).alpha = 0
+		@model.setScale(0.2)
 		@model.body.setOffset(-200, -200).setSize(400, 400)
 		# Additional setup.
 		@game.spacecrafts.add(@model)
@@ -328,7 +329,8 @@ class MissileBase extends Body
 			frequency: -1, blendMode: 'ADD'
 		# Appearing.
 		@teleport = @scene.tweens.add cfg =
-			targets: @model, scaleX: 0.2, alpha: 1, duration: 1000,	ease: 'Sine.easeInOut'
+			targets: @model, scaleX: {from: .0, to: .2}, alpha: {from: 0, to: 1}, duration: 1000, ease: 'Sine.easeInOut'
+		.on 'complete', => @ready = true
 
 	explode: () ->
 		super 75
@@ -337,7 +339,7 @@ class MissileBase extends Body
 
 	update: () ->
 		super()
-		return true unless @teleport.progress is 1
+		return true unless @ready
 		@turn 100
 		if @reload++ is 100 and @shoot(Missile, @game.player)
 			@silo.explode(80, @x, @y)
