@@ -94,11 +94,11 @@ class Body
 		if @engine?
 			@engine.main.stop()
 			[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
-			@engine.main.followOffset.x	= -cos	* @mengine_off
-			@engine.main.followOffset.y	= -sin	* @mengine_off
+			@engine.main.followOffset.x	= -cos * @mengine_off
+			@engine.main.followOffset.y	= -sin * @mengine_off
 			for side in "LR" when side = "delta" + side
-				@engine[side].followOffset.x	= cos	* @dengine_off
-				@engine[side].followOffset.y	= sin	* @dengine_off
+				@engine[side].followOffset.x = cos * @dengine_off
+				@engine[side].followOffset.y = sin * @dengine_off
 		# Deacceleration.
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
