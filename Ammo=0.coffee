@@ -91,14 +91,14 @@ class Body
 		# Physics handler.
 		@scene.physics.world.wrap @model, 0
 		# Engines control
-		@engine?.main.stop()
-		[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
-		@engine?.main.followOffset.x	= -cos	* @mengine_off
-		@engine?.main.followOffset.y	= -sin	* @mengine_off
-		@engine?.deltaL.followOffset.x	= cos	* @dengine_off
-		@engine?.deltaL.followOffset.y	= sin	* @dengine_off
-		@engine?.deltaR.followOffset.x	= cos	* @dengine_off
-		@engine?.deltaR.followOffset.y	= sin	* @dengine_off
+		if @engine?
+			@engine.main.stop()
+			[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
+			@engine.main.followOffset.x	= -cos	* @mengine_off
+			@engine.main.followOffset.y	= -sin	* @mengine_off
+			for side in "LR" when side = "delta" + side
+				@engine[side].followOffset.x	= cos	* @dengine_off
+				@engine[side].followOffset.y	= sin	* @dengine_off
 		# Deacceleration.
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
@@ -320,16 +320,17 @@ class MissileBase extends Body
 		@model.setScale(0.2)
 		@model.body.setOffset(-200, -200).setSize(400, 400)
 		# Additional setup.
-		@game.spacecrafts.add(@model)
+		@game.spacecrafts.add @model
 		@game.enemies++
 		@reload	= 0
-		# Missile silo
-		@silo	= @game.steam.createEmitter cfg =
-			speed: {min: 50, max: 100}, scale: {start: 0.1,	end: 0.05},	alpha: {start: 1, end: 0 }
+		# Missile silo.
+		@silo	= @game.steam.createEmitter
+			speed: {min: 50, max: 100}, scale: {start: 0.1,	end: 0.05},	alpha: {start: 1, end: 0}
 			frequency: -1, blendMode: 'ADD'
 		# Appearing.
-		@teleport = @scene.tweens.add cfg =
+		@teleport = @scene.tweens.add
 			targets: @model, scaleX: {from: .0, to: .2}, alpha: {from: 0, to: 1}, duration: 1000, ease: 'Sine.easeInOut'
+			#onComplete: => @ready = true
 		.on 'complete', => @ready = true
 
 	explode: () ->
