@@ -477,9 +477,7 @@ class Game
 		# Exeiting preparations.
 		begin_game = () => unless @player? or @scene.cameras.main.fadeEffect.isRunning
 			@scene.cameras.main.fadeOut 1000, 0, 0, 0, (camera, progress) =>
-				if progress is 1
-					@player = {alive: false}
-					@welcome.visible = false
+				if progress is 1 then [@player, @welcome.visible] = [{alive: false}, false]
 		@space.setInteractive().once	'pointerdown',	begin_game
 		@scene.input.gamepad.once		'down',			begin_game
 		@scene.input.keyboard.once		'keydown',		key_check = (input) =>
