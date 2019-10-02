@@ -29,13 +29,13 @@ class Body
 			@engine = 
 				main: @game[trail_id].createEmitter Object.assign engine_template,
 					speed: {max: 90, min: 100}, scale: { start: 0.02, end: 0 },	
-					angle: () => @model.angle + 90 + Phaser.Math.Between -@turbofan, @turbofan
+					angle: () => @angle + 180 + Phaser.Math.Between -@turbofan, @turbofan
 				deltaL: @game[trail_id].createEmitter Object.assign engine_template,
 					speed: {max: 250, min: 150}, scale: { start: 0.0225, end: 0 }, lifespan: 300,
-					angle: () => @model.angle - 45 + Phaser.Math.Between -@turbofan, @turbofan
+					angle: () => @angle + 45 + Phaser.Math.Between -@turbofan, @turbofan
 				deltaR: @game[trail_id].createEmitter Object.assign engine_template,
 					speed: {max: 250, min: 150}, scale: { start: 0.0225, end: 0 }, lifespan: 300,
-					angle: () => @model.angle - 135 + Phaser.Math.Between -@turbofan, @turbofan
+					angle: () => @angle - 45 + Phaser.Math.Between -@turbofan, @turbofan
 			@engine[thruster].startFollow(@model, true, 0.05, 0.05) for thruster of @engine
 
 	turn: (speed) ->
@@ -56,7 +56,7 @@ class Body
 		if Math.abs(delta) > 3.14 then delta = -delta
 		@turn -(if Math.abs(delta) > speed/1000 then Math.sign(delta) * speed else delta)
 
-	accel: (angle = @model.rotation - 3.14 / 2, impulse = @thrust) ->
+	accel: (angle = @rotation, impulse = @thrust) ->
 		@model.body.setVelocityX(@model.body.velocity.x * 0.98).setVelocityY(@model.body.velocity.y * 0.98)
 		@scene.physics.velocityFromRotation angle, impulse * @tempo, @acceleration
 		@engine?.main.start()
@@ -66,7 +66,7 @@ class Body
 		@accel()
 
 	strafe: (to_right = false, impulse = @thrust) ->
-		@accel @model.rotation-3.14*[0.75,0.25][0+to_right]
+		@accel @rotation+3.14*[-0.25,0.25][0+to_right]
 		@engine[if to_right then "deltaR" else "deltaL"].explode(3)
 
 	shoot: (ammo, target) ->
@@ -110,6 +110,8 @@ class Body
 	@getter 'x',			() -> @model.x
 	@getter 'y',			() -> @model.y
 	@getter 'pos',			() -> @model.position
+	@getter 'angle',		() -> @model.angle - 90
+	@getter 'rotation',		() -> @model.rotation - 3.14/2
 	@getter 'acceleration', () -> @model.body.acceleration
 	@getter 'remoteness',	() -> Phaser.Math.Distance.Between @game.player.x, @game.player.y, @x, @y
 # -------------------- #
