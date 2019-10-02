@@ -96,9 +96,9 @@ class Body
 			[cos, sin] = [Math.cos(@model.rotation-3.14/2), Math.sin(@model.rotation-3.14/2)]
 			@engine.main.followOffset.x	= -cos * @mengine_off
 			@engine.main.followOffset.y	= -sin * @mengine_off
-			for side in "LR" when side = "delta" + side
-				@engine[side].followOffset.x = cos * @dengine_off
-				@engine[side].followOffset.y = sin * @dengine_off
+			for eng in "LR" when eng = @engine["delta" + eng]
+				eng.followOffset.x = cos * @dengine_off
+				eng.followOffset.y = sin * @dengine_off
 		# Deacceleration.
 		@model.body.setAngularVelocity 0
 		@model.body.setAcceleration 0
@@ -475,7 +475,8 @@ class Game
 		@cleanup()
 		@welcome.visible = true
 		# Exeiting preparations.
-		begin_game = () => unless @player? then @scene.cameras.main.fadeOut 1000, 0, 0, 0, (camera, progress) =>
+		begin_game = () => unless @player? or @scene.cameras.main.fadeEffect.isRunning
+			@scene.cameras.main.fadeOut 1000, 0, 0, 0, (camera, progress) =>
 				if progress is 1
 					@player = {alive: false}
 					@welcome.visible = false
