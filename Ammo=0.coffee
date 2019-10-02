@@ -166,7 +166,7 @@ class Player extends Body
 			onRepeat: => @beat_sfx.play()
 		# Finalization.
 		@cam = game.maincam
-		@cam.startFollow @model, true#, 0.05, 0.05
+		@cam.startFollow @model, true
 		@departure = new Date()
 
 	explode: () ->
@@ -203,9 +203,6 @@ class Player extends Body
 	update: () ->
 		super()
 		tformat = (secs) ->	[secs // 60, secs % 60].map (f) -> "#{f}".padStart(2, '0')
-		# Test.
-		lerp = if @cam.worldView.contains(@x, @y) then 1 else 0.05
-		@cam.setLerp(lerp, lerp)
 		# Crosshair updating.
 		Object.assign @target, @cam.getWorldPoint @scene.input.activePointer.position.x,
 			@scene.input.activePointer.position.y
@@ -275,6 +272,8 @@ class Player extends Body
 		else @hud.list[4].setColor('goldenrod').setText "🏆#{tformat(time//1000).join(':')}⋮☠#{trashed}"
 		# HUD update: ammo counter.
 		@hud.list[7].setText "Ammo:#{@ammo}"
+		# Camera controls.
+		@cam.setLerp(if @cam.worldView.contains(@x, @y) then 1 else 0.05)
 		# Finalization.
 		@alive
 
