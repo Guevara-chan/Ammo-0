@@ -155,7 +155,7 @@ class Player extends Body
 			(() -> @game.paused = not @game.paused), 
 			((val) -> @setText "\n" + ["❚❚", ""][0 + val])
 		@switch.setColor('gray')
-		# Hud setup (ammo counter, threat gauge)
+		# HUD etup (ammo counter, threat gauge)
 		@hud.add(@scene.add.text(cfg.width-65, cfg.height-30, '', hud_font).setOrigin(0.5, 0.5).setColor('#cb4154')
 			.setShadow 0, 0, "crimson", 7, true, true)
 		.add @scene.add.rectangle(15, cfg.height-20, 0, 0, 0xfffff).setOrigin(0, 1)
@@ -164,8 +164,9 @@ class Player extends Body
 		@hud.beat = @scene.tweens.add
 			targets: @hud.list[7], scaleX: 0.9, scaleY: 1.2, duration: 75, yoyo: true, repeat: -1, repeatDelay: 935
 			onRepeat: => @beat_sfx.play()
-		# Finlization.
-		@scene.cameras.main.startFollow @model, true, 0.05, 0.05
+		# Finalization.
+		@cam = game.maincam
+		@cam.startFollow @model, true#, 0.05, 0.05
 		@departure = new Date()
 
 	explode: () ->
@@ -189,8 +190,8 @@ class Player extends Body
 		@scene.postmortem.record = {time: @flytime, trashed: @trashed}
 		# Other stuff.
 		@target.destroy()
-		@scene.cameras.main.fadeOut(1000)
-		@scene.cameras.main.shake()
+		@cam.fadeOut(1000)
+		@cam.shake()
 
 	notedeath: () ->
 		return unless @alive
@@ -202,8 +203,11 @@ class Player extends Body
 	update: () ->
 		super()
 		tformat = (secs) ->	[secs // 60, secs % 60].map (f) -> "#{f}".padStart(2, '0')
+		# Test.
+		lerp = if @cam.worldView.contains(@x, @y) then 1 else 0.05
+		@cam.setLerp(lerp, lerp)
 		# Crosshair updating.
-		Object.assign @target, @scene.cameras.main.getWorldPoint @scene.input.activePointer.position.x,
+		Object.assign @target, @cam.getWorldPoint @scene.input.activePointer.position.x,
 			@scene.input.activePointer.position.y
 		@target.first.rotation -= 0.025
 		# Controls.
@@ -237,7 +241,7 @@ class Player extends Body
 					else if pad?.A	or any_down 'UP', 'W'	then @propel()
 				@B_prev = pad?._RCRight.pressed
 				false
-		# Mass damper
+		# Mass damper.
 		@turbofan = if @damping and @model.body.speed > 20 and not @thrusters
 			@engine.deltaL.explode	intensity = @model.body.speed / 5
 			@engine.deltaR.explode	intensity
@@ -391,8 +395,9 @@ class Game
 
 	create: () ->
 		# Init setup.
-		cfg		= @app.config
-		@space	= @scene.add.tileSprite cfg.width / 2, cfg.height / 2, cfg.width*2, cfg.height*2, 'space'
+		cfg		 = @app.config
+		@maincam = @scene.cameras.main
+		@space	 = @scene.add.tileSprite cfg.width / 2, cfg.height / 2, cfg.width*2, cfg.height*2, 'space'
 		@spacecrafts = @scene.physics.add.group()
 		@space.setScrollFactor(0)
 		#@space.setAlpha 0.5
@@ -475,8 +480,8 @@ class Game
 		@cleanup()
 		@welcome.visible = true
 		# Exeiting preparations.
-		begin_game = () => unless @player? or @scene.cameras.main.fadeEffect.isRunning
-			@scene.cameras.main.fadeOut 1000, 0, 0, 0, (camera, progress) =>
+		begin_game = () => unless @player? or @maincam.fadeEffect.isRunning
+			@maincam.fadeOut 1000, 0, 0, 0, (camera, progress) =>
 				if progress is 1 then [@player, @welcome.visible] = [{alive: false}, false]
 		@space.setInteractive().once	'pointerdown',	begin_game
 		@scene.input.gamepad.once		'down',			begin_game
@@ -495,7 +500,7 @@ class Game
 		[width, height] = [2500, 2500]
 		[x, y]			= [-width / 2, -height / 2]
 		@scene.physics.world.setBounds	x, y, width, height
-		@scene.cameras.main.setBounds	x, y, width, height
+		@maincam.setBounds				x, y, width, height
 		# Object placement.
 		switch @mode
 			when 'survival' # Legacy near enemy.
@@ -524,7 +529,7 @@ class Game
 		# Finalization.
 		@spawnlag		= 0
 		@space.rotation = 0
-		@scene.cameras.main.fadeIn(1000)
+		@maincam.fadeIn(1000)
 
 	spawn: (kind = MissileBase, pos) ->
 		unless pos?
@@ -573,8 +578,8 @@ class Game
 		#console.log localStorage[@records_key]
 
 	update: () ->
-		[@space.tilePositionX, @space.tilePositionY] = [@scene.cameras.main.scrollX, @scene.cameras.main.scrollY]
-		if @scene.cameras.main.fadeEffect.isRunning then return
+		[@space.tilePositionX, @space.tilePositionY] = [@maincam.scrollX, @maincam.scrollY]
+		if @maincam.fadeEffect.isRunning then return
 		else return @space.rotation -= 0.001 unless @player?
 		if @player.alive # Updating objects.
 			@pending = []
