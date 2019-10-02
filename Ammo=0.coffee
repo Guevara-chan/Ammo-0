@@ -273,7 +273,7 @@ class Player extends Body
 		# HUD update: ammo counter.
 		@hud.list[7].setText "Ammo:#{@ammo}"
 		# Camera controls.
-		@cam.setLerp(if @cam.worldView.contains(@x, @y) then 1 else 0.05)
+		@cam.setLerp(if @cam.worldView.contains(@x, @y) then 0.9 else 0.05)
 		# Finalization.
 		@alive
 
